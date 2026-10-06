@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="aura solutions 64">
+		<Project filename="../../app/ace/ace.cbp" />
+		<Project filename="../app/app.cbp">
+			<Depends filename="../../app/ace/ace.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../third/aqua/aqua.cbp" />
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../app/ace/ace.cbp" />
+			<Depends filename="../../third/sn/aurasn.cbp" />
+			<Depends filename="../../third/aqua/aqua.cbp" />
+		</Project>
+		<Project filename="../../third/sn/aurasn.cbp" />
+		<Project filename="../../app/axis/axis.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/base/base.cbp">
+			<Depends filename="../../app/ace/ace.cbp" />
+			<Depends filename="../../app/axis/axis.cbp" />
+		</Project>
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../app/axis/axis.cbp" />
+			<Depends filename="../../app/base/base.cbp" />
+		</Project>
+		<Project filename="../../design/textformat/textformat.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/draw2d_cairo.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/draw2d_cairo.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+		</Project>
+		<Project filename="../../app/experience_anthill/experience_anthill.cbp" />
+		<Project filename="../../app/experience_core/experience_core.cbp" />
+		<Project filename="../../app/experience_tranquillum/experience_tranquillum.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

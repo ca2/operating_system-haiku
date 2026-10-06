@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="aura">
+		<Project filename="../../app/aura/para_aura.cbp">
+			<Depends filename="../../third/sn/para_sn.cbp" />
+		</Project>
+		<Project filename="../../third/sn/para_sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

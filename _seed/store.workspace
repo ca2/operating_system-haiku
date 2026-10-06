@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="basic">
+		<Project filename="../../app-core/store/store.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app-core/library/library.cbp" />
+		</Project>
+		<Project filename="../../app/ace/ace.cbp" />
+		<Project filename="../app/app.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../app/ace/ace.cbp" />
+		</Project>
+		<Project filename="../../app/axis/axis.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/base/base.cbp">
+			<Depends filename="../../app/axis/axis.cbp" />
+		</Project>
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../app/axis/axis.cbp" />
+			<Depends filename="../../app/base/base.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/draw2d_cairo.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+		</Project>
+		<Project filename="../../app/experience_tranquillum/experience_tranquillum.cbp" />
+		<Project filename="../../app-core/library/library.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="all_small">
+		<Project filename="../../app/ace/ace.cbp" />
+		<Project filename="../../third/aqua/aqua.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

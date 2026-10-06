@@ -1,0 +1,5 @@
+LIBRARY "apex_haiku"
+
+EXPORTS
+apex_haiku_factory
+

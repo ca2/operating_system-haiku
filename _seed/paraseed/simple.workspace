@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="simple">
+		<Project filename="../../app-simple/application/clang_simple_application.cbp">
+			<Depends filename="../../app/clang_app.cbp" />
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/clang_cairo.cbp" />
+			<Depends filename="../../app/experience_core/clang_experience_core.cbp" />
+			<Depends filename="../../app/freeimage_imaging/clang_freeimage_imaging.cbp" />
+		</Project>
+		<Project filename="../../app-simple/box/clang_simple_box.cbp" />
+		<Project filename="../../app-simple/drawing/clang_simple_drawing.cbp">
+			<Depends filename="../../app/clang_app.cbp" />
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/clang_cairo.cbp" />
+			<Depends filename="../../app/experience_core/clang_experience_core.cbp" />
+			<Depends filename="../../app/freeimage_imaging/clang_freeimage_imaging.cbp" />
+		</Project>
+		<Project filename="../../app-simple/form/clang_simple_form.cbp">
+			<Depends filename="../../app/experience_tranquillum/clang_experience_tranquillum.cbp" />
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+		</Project>
+		<Project filename="../../app-simple/notify_drawing/clang_notify_drawing.cbp">
+			<Depends filename="../../app-simple/drawing/clang_simple_drawing.cbp" />
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+			<Depends filename="../../app/experience_core/clang_experience_core.cbp" />
+		</Project>
+		<Project filename="../../app-simple/os_drag_and_drop/clang_simple_os_drag_and_drop.cbp" />
+		<Project filename="../../app/clang_app.cbp">
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+		</Project>
+		<Project filename="../../app/aura/clang_aura.cbp" />
+		<Project filename="../../app/draw2d_cairo/clang_cairo.cbp">
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+		</Project>
+		<Project filename="../../app/experience_core/clang_experience_core.cbp">
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+		</Project>
+		<Project filename="../../app/experience_tranquillum/clang_experience_tranquillum.cbp">
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+		</Project>
+		<Project filename="../../app/freeimage_imaging/clang_freeimage_imaging.cbp">
+			<Depends filename="../../app/aura/clang_aura.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

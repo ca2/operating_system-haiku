@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="foundation">
+		<Project filename="../../app-core/addressbook/addressbook.cbp">
+			<Depends filename="../../app-core/note/note.cbp" />
+			<Depends filename="../app/app.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/experience_anthill/experience_anthill.cbp" />
+		</Project>
+		<Project filename="../../app-core/verilux/verilux.cbp">
+			<Depends filename="../app/app.cbp" />
+		</Project>
+		<Project filename="../../app-core/verifile/verifile.cbp">
+			<Depends filename="../app/app.cbp" />
+		</Project>
+		<Project filename="../../app-core/hash_hub/hash_hub.cbp">
+			<Depends filename="../../app-core/hash_base/hash_base.cbp" />
+			<Depends filename="../../app-core/hash_crc/hash_crc.cbp" />
+			<Depends filename="../../app-core/hash_md5/hash_md5.cbp" />
+			<Depends filename="../../app-core/hash_sha1/hash_sha1.cbp" />
+			<Depends filename="../../app/experience_anthill/experience_anthill.cbp" />
+		</Project>
+		<Project filename="../../app-core/note/note.cbp">
+			<Depends filename="../../app-core/audio/audio.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_core/experience_core.cbp" />
+		</Project>
+		<Project filename="../app/app.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app-core/hash_base/hash_base.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app-core/hash_crc/hash_crc.cbp" />
+		<Project filename="../../app-core/hash_md5/hash_md5.cbp" />
+		<Project filename="../../app-core/hash_sha1/hash_sha1.cbp" />
+		<Project filename="../../app-veriwell/audio_decode_libmpg123/audio_decode_libmpg123.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app-core/multimedia/multimedia.cbp" />
+			<Depends filename="../../app-veriwell/multimedia/veriwell_multimedia.cbp" />
+		</Project>
+		<Project filename="../../app-core/audio_decode_wave/audio_decode_wave.cbp">
+			<Depends filename="../../app-core/multimedia/multimedia.cbp" />
+		</Project>
+		<Project filename="../../app-core/audio/audio.cbp" />
+		<Project filename="../audio_alsa/audio_alsa.cbp" />
+		<Project filename="../../app/aura/aura.cbp" />
+		<Project filename="../../design/text_format/text_format.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_anthill/experience_anthill.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/cairo.cbp" />
+		<Project filename="../../app/experience_anthill/experience_anthill.cbp" />
+		<Project filename="../../app/experience_core/experience_core.cbp" />
+		<Project filename="../../app-core/gcom/gcom.cbp" />
+		<Project filename="../../app-core/multimedia/multimedia.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app-core/gcom/gcom.cbp" />
+		</Project>
+		<Project filename="../../app-core/userdatetime/userdatetime.cbp" />
+		<Project filename="../../app-veriwell/multimedia/veriwell_multimedia.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app-core/multimedia/multimedia.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

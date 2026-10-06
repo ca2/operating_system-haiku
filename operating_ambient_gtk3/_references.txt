@@ -1,0 +1,2 @@
+operating_system-haiku/node_haiku
+operating_system-posix/node_gtk3

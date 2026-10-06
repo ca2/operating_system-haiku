@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="simple_application">
+		<Project filename="../../app-simple/application/para_simple_application.cbp">
+			<Depends filename="../../app/aura/para_aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/para_cairo.cbp" />
+			<Depends filename="../../app/experience_core/para_experience_core.cbp" />
+			<Depends filename="../../app/freeimage_imaging/para_freeimage_imaging.cbp" />
+		</Project>
+		<Project filename="../../app/aura/para_aura.cbp">
+			<Depends filename="../../third/sn/para_sn.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/para_cairo.cbp">
+			<Depends filename="../../app/aura/para_aura.cbp" />
+		</Project>
+		<Project filename="../../app/experience_core/para_experience_core.cbp" />
+		<Project filename="../../app/freeimage_imaging/para_freeimage_imaging.cbp" />
+		<Project filename="../../third/sn/para_sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

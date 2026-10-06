@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="third">
+		<Project filename="../../third/strophe/strophe.cbp" />
+		<Project filename="../../third/winpr/winpr.cbp" />
+		<Project filename="../../third/freerdp/freerdp.cbp">
+			<Depends filename="../../third/winpr/winpr.cbp" />
+		</Project>
+		<Project filename="../../third/clientchannels/clientchannels.cbp">
+			<Depends filename="../../third/winpr/winpr.cbp" />
+			<Depends filename="../../third/freerdp/freerdp.cbp" />
+		</Project>
+		<Project filename="../../third/libmpg123/clang_libmpg123.cbp" />
+		<Project filename="../../third/sn/clang_sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

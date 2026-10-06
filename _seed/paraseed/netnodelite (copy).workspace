@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="all32">
+		<Project filename="../app/app.cbp">
+			<Depends filename="../../os.cbp" />
+		</Project>
+		<Project filename="../../app-core/alarm/alarm.cbp" />
+		<Project filename="../../app-core/deepfish/deepfish.cbp" />
+		<Project filename="../../app-core/netnode_dynamic_web_server/netnode_dynamic_web_server.cbp">
+			<Depends filename="../../app/thirdparty/cairo/cairo.cbp" />
+			<Depends filename="../../app/thirdparty/freetype/freetype.cbp" />
+			<Depends filename="../../app/thirdparty/openssl/openssl.cbp" />
+			<Depends filename="../../app/thirdparty/pixman/pixman.cbp" />
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+			<Depends filename="../app/app.cbp" />
+			<Depends filename="../../app-core/alarm/alarm.cbp" />
+			<Depends filename="../../app-core/deepfish/deepfish.cbp" />
+			<Depends filename="../../app-core/uinteraction/uinteraction.cbp" />
+			<Depends filename="../../os.cbp" />
+			<Depends filename="../../app-core/netnode/netnode.cbp" />
+			<Depends filename="../../app-core/netnode_dynamic_source_library/netnode_dynamic_source_library.cbp" />
+			<Depends filename="../../app-core/netnode_dynamic_source_script/netnode_dynamic_source_script.cbp" />
+		</Project>
+		<Project filename="../../app-core/netnode_dynamic_web_server_cfg/netnode_dynamic_web_server_cfg.cbp">
+			<Depends filename="../app/app.cbp" />
+			<Depends filename="../../app-core/alarm/alarm.cbp" />
+			<Depends filename="../../app-core/deepfish/deepfish.cbp" />
+			<Depends filename="../../app-core/uinteraction/uinteraction.cbp" />
+			<Depends filename="../../app/thirdparty/cairo/cairo.cbp" />
+			<Depends filename="../../app/thirdparty/freetype/freetype.cbp" />
+			<Depends filename="../../app/thirdparty/openssl/openssl.cbp" />
+			<Depends filename="../../app/thirdparty/pixman/pixman.cbp" />
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+			<Depends filename="../../app/draw2d_cairo/draw2d_cairo.cbp" />
+			<Depends filename="../../os.cbp" />
+			<Depends filename="../../app-core/tesseract/tesseract.cbp" />
+		</Project>
+		<Project filename="../../app-core/uinteraction/uinteraction.cbp" />
+		<Project filename="../../app/base/base.cbp" />
+		<Project filename="../../app/thirdparty/cairo/cairo.cbp">
+			<Depends filename="../../app/thirdparty/freeimage/FreeImage.cbp" />
+			<Depends filename="../../app/thirdparty/freetype/freetype.cbp" />
+			<Depends filename="../../app/thirdparty/pixman/pixman.cbp" />
+		</Project>
+		<Project filename="../../app/thirdparty/freeimage/FreeImage.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/thirdparty/mysql/mysql.cbp" />
+		</Project>
+		<Project filename="../../app/thirdparty/freetype/freetype.cbp">
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+		</Project>
+		<Project filename="../../app/thirdparty/mysql/mysql.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/thirdparty/openssl/openssl.cbp" />
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+		</Project>
+		<Project filename="../../app/thirdparty/openssl/openssl.cbp" />
+		<Project filename="../../app/thirdparty/pixman/pixman.cbp">
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+		</Project>
+		<Project filename="../../app/thirdparty/zlib/zlib.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+		</Project>
+		<Project filename="../../app/boot/boot.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/thirdparty/cairo/cairo.cbp" />
+		</Project>
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../app/thirdparty/mysql/mysql.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/draw2d_cairo.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/thirdparty/cairo/cairo.cbp" />
+			<Depends filename="../../app/boot/boot.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../os.cbp">
+			<Depends filename="../../app/thirdparty/freetype/freetype.cbp" />
+			<Depends filename="../../app/thirdparty/openssl/openssl.cbp" />
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+			<Depends filename="../../app/boot/boot.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app-core/netnode/netnode.cbp">
+			<Depends filename="../../app/thirdparty/cairo/cairo.cbp" />
+			<Depends filename="../../app/thirdparty/freetype/freetype.cbp" />
+			<Depends filename="../../app/thirdparty/openssl/openssl.cbp" />
+			<Depends filename="../../app/thirdparty/pixman/pixman.cbp" />
+			<Depends filename="../../app/thirdparty/zlib/zlib.cbp" />
+			<Depends filename="../../os.cbp" />
+		</Project>
+		<Project filename="../../app-core/netnode_dynamic_source_library/netnode_dynamic_source_library.cbp" />
+		<Project filename="../../app-core/netnode_dynamic_source_script/netnode_dynamic_source_script.cbp" />
+		<Project filename="../../app-core/tesseract/tesseract.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+			<Depends filename="../../app/boot/boot.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

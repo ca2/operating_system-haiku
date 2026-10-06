@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="__hello">
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/app/acme/clang_acme.cbp" />
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/app/apex/apex.cbp" />
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/app/aqua/aqua.cbp" />
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/console/helloearth/helloearth.cbp" />
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/console/hellosolarsystem/hellosolarsystem.cbp">
+			<Depends filename="../../../../../../usr/home/camilo/__archive/basis/app/apex/apex.cbp" />
+			<Depends filename="../../../../../../usr/home/camilo/__archive/basis/app/aqua/aqua.cbp" />
+		</Project>
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/console/readlines/readlines.cbp">
+			<Depends filename="../../../../../../usr/home/camilo/__archive/basis/app/apex/apex.cbp" />
+		</Project>
+		<Project filename="../../../../../../usr/home/camilo/__archive/basis/third/sn/sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

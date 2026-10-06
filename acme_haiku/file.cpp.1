@@ -1,0 +1,764 @@
+#include "platform.h"
+#include "file.h"
+#include "acme_directory.h"
+
+
+#include <fcntl.h>
+#undef USE_MISC
+#include <unistd.h>
+
+
+#include <link.h>
+
+
+#include <ctype.h>
+#include <sys/stat.h>
+
+
+#include <dlfcn.h>
+
+//#elif defined(MACOS)
+//#include <dlfcn.h>
+//#endif
+
+/*__STATIC inline bool IsDirSep(WCHAR ch)
+{
+
+   return (ch == '\\' || ch == '/');
+
+}*/
+
+
+namespace acme_haiku
+{
+
+
+   file::file()
+   {
+
+      m_iPutCharacter = -1;
+      m_iFile = INVALID_FILE;
+
+   }
+
+
+//   file::file(::matter * pobject, int iFile) :
+//      ::matter(pobject)
+//   {
+//
+//      m_iFile = iFile;
+//
+//   }
+//
+//
+//   file::file(::matter * pobject, const ::file::path & pszFileName, const enumeration < ::file::e_open > & eopen) :
+//      ::matter(pobject)
+//   {
+//
+//      m_iFile = INVALID_FILE;
+//
+//      if(!open(pszFileName, eopen))
+//      {
+//
+//         __throw(::file::exception(::error_file, -1, pszFileName));
+//
+//      }
+//
+//
+//   }
+
+
+   file::~file()
+   {
+
+      if (m_iFile != INVALID_FILE)
+         close();
+
+   }
+
+//   __pointer(::file::file) file::Duplicate() const
+//
+//   {
+//
+//      i32 iNew = dup(m_iFile);
+//
+//      if(iNew == INVALID_FILE)
+//         return nullptr;
+//
+//      auto pFile  = __new(file(get_application(), iNew));
+//      pFile->m_iFile = (::u32)iNew;
+//      ASSERT(pFile->m_iFile != INVALID_FILE);
+//      return pFile;
+//
+//   }
+//
+
+
+//   void file::open(const ::file::path & path, ::file::e_open eopenParam, ::pointer < ::file::exception > * pfileexception)
+//   {
+//
+//      if (m_iFile != INVALID_FILE)
+//      {
+//
+//         close();
+//
+//      }
+//
+//      auto eopen = eopenParam;
+//
+//      //ASSERT(__is_valid_string(pszFileName));
+//
+//      // file objects are always binary and CreateFile does not need flag
+//      eopen -= ::file::e_open_binary;
+//
+//      if ((eopen & ::file::e_open_defer_create_directory) && (eopen & ::file::e_open_write))
+//      {
+//
+//         acmedirectory()->create(path.folder());
+//
+//      }
+//
+//      m_iFile = INVALID_FILE;
+//
+//      m_path     = path;
+//
+//
+//      //ASSERT(sizeof(HANDLE) == sizeof(uptr));
+//      ASSERT(::file::e_open_share_compat == 0);
+//
+//      // ::collection::map read/write mode
+//      ASSERT((::file::e_open_read|::file::e_open_write|::file::e_open_read_write) == 3);
+//      ::u32 dwFlags =  0;
+//      switch (eopen & ::file::e_open_read_write)
+//      {
+//      case ::file::e_open_read:
+//         dwFlags |=  O_RDONLY;
+//         break;
+//      case ::file::e_open_write:
+//         dwFlags |=  O_WRONLY ;
+//         break;
+//      case ::file::e_open_read_write:
+//         dwFlags |=  O_RDWR;
+//         break;
+//      default:
+//         dwFlags |=  O_RDONLY;
+//         break;
+//      }
+//
+//      // ::collection::map share mode
+//      ::u32 dwShareMode = 0;
+//      switch (eopen & ::file::e_open_share_mask)    // ::collection::map compatibility mode to exclusive
+//      {
+//      default:
+//         ASSERT(false);  // invalid share mode?
+//      case ::file::e_open_share_compat:
+//      case ::file::e_open_share_exclusive:
+//         //dwShareMode = 0;
+//         break;
+//      case ::file::e_open_share_deny_write:
+//         //dwFlags |= O_SHLOCK;
+//         break;
+//      case ::file::e_open_share_deny_read:
+////         dwFlags |= O_EXLOCK;
+//         break;
+//      case ::file::e_open_share_deny_none:
+//         //dwFlags = FILE_SHARE_WRITE|FILE_SHARE_READ;
+//         break;
+//      }
+//
+//      if(eopen & ::file::e_open_create)
+//      {
+//         dwFlags |= O_CREAT;
+//         if(!(eopen & ::file::e_open_no_truncate))
+//            dwFlags |= O_TRUNC;
+//      }
+//      else if(eopen & ::file::e_open_truncate)
+//      {
+//         dwFlags |= O_TRUNC;
+//      }
+//
+//      ::u32 dwPermission = 0;
+//
+//      dwPermission |= S_IRUSR | S_IWUSR | S_IXUSR;
+//      dwPermission |= S_IRGRP | S_IWGRP | S_IXGRP;
+//      dwPermission |= S_IROTH | S_IROTH;
+//
+//      //auto path = m_psystem->m_pacmepath->final(m_path);
+//
+//      // attempt file creation
+//      //HANDLE hFile = shell::CreateFile(::str::international::utf8_to_unicode(m_path), dwAccess, dwShareMode, &sa, dwCreateFlag, FILE_ATTRIBUTE_NORMAL, nullptr);
+//      int iFile = ::open(m_path, dwFlags, dwPermission); //::open(m_path, dwAccess, dwShareMode, &sa, dwCreateFlag, FILE_ATTRIBUTE_NORMAL, nullptr);
+//
+//      if(iFile == INVALID_FILE)
+//      {
+//
+//         int iError = errno;
+//
+//         m_estatus = ::errno_to_status(iError);
+//
+//         if(!::failed(m_estatus))
+//         {
+//
+//            m_estatus = ::error_failed;
+//
+//         }
+//
+//         set_nok();
+//
+//         if(eopen & ::file::e_open_no_exception_on_open)
+//         {
+//
+//            return;
+//
+//         }
+//
+//         //return //::fesp(get_application(), file_exception::os_error_to_exception(dwLastError), dwLastError, m_path);
+//
+//         throw ::file::exception(m_estatus, 0, iError, m_path, eopen);
+//
+//      }
+//
+//      //::lseek64(m_iFile, 0, SEEK_SET);
+//
+//      m_iFile = iFile;
+//
+//      m_eopen = eopen;
+//
+//      m_estatus = ::success;
+//
+//      set_ok();
+//
+//      //return ::success;
+//
+//   }
+//
+//
+//   memsize file::read(void * pdata, memsize nCount)
+//   {
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//
+//      if (nCount == 0)
+//      {
+//
+//         return 0;   // avoid Win32 "null-read"
+//
+//      }
+//
+//      ASSERT(pdata != nullptr);
+//
+//      ASSERT(__is_valid_address(pdata, nCount));
+//
+//      if(m_iPutCharacter >= 0)
+//      {
+//
+//         auto p = (byte *) pdata;
+//
+//         *p = (byte) m_iPutCharacter;
+//
+//         m_iPutCharacter = -1;
+//
+//         nCount--;
+//
+//         if(nCount <= 0)
+//         {
+//
+//            return 1;
+//
+//         }
+//
+//         p++;
+//
+//         pdata = p;
+//
+//      }
+//
+//      memsize pos = 0;
+//      memsize sizeRead = 0;
+//      memsize readNow;
+//      while(nCount > 0)
+//      {
+//         readNow = (size_t) minimum(0x7fffffff, nCount);
+//         i32 iRead = ::read(m_iFile, &((u8 *)pdata)[pos], readNow);
+//
+//         if(iRead < 0)
+//         {
+//            i32 iError = errno;
+//            if(iError == EAGAIN)
+//            {
+//
+//            }
+//            auto estatus = errno_to_status(iError);
+//            ::file::exception(estatus, 0, iError, m_path, m_eopen);
+//         }
+//         else if(iRead == 0)
+//         {
+//            break;
+//         }
+//
+//         nCount -= iRead;
+//         pos += iRead;
+//         sizeRead += iRead;
+//      }
+//
+//      return sizeRead;
+//   }
+//
+//
+//   void file::write(const void * pdata, memsize nCount)
+//   {
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//
+//      if (nCount == 0)
+//      {
+//
+//         return;     // avoid Win32 "null-write" option
+//
+//      }
+//
+//      ASSERT(pdata != nullptr);
+//
+//      ASSERT(__is_valid_address(pdata, nCount, false));
+//
+//      memsize pos = 0;
+//
+//      while(nCount > 0)
+//      {
+//
+//         auto bytesToWrite = minimum(0x7fffffff, nCount);
+//
+//         auto pdataToWrite = ((const u8 *)pdata) + pos;
+//
+//         i32 iWrite = ::write(m_iFile, pdataToWrite, bytesToWrite);
+//
+//         if(iWrite < 0)
+//         {
+//
+//            auto iError = errno;
+//
+//            auto estatus = errno_to_status(iError);
+//
+//            ::file::exception(estatus, 0, iError, m_path, m_eopen);
+//
+//         }
+//
+//         nCount -= iWrite;
+//
+//         pos += iWrite;
+//
+//      }
+//
+//      // Win32s will not return an error all the time (usually DISK_FULL)
+//      //if (iWrite != nCount)
+//      //vfxThrowFileexception(::file::exception::diskFull, -1, m_path);
+//   }
+//
+//
+//   ::index file::translate(::count offset, ::enum_seek eseek)
+//   {
+//
+//      if(m_iFile == INVALID_FILE)
+//      {
+//
+//         ::file::exception(error_wrong_state, 0, -1, m_path, m_eopen);
+//
+//      }
+//
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//      ASSERT(eseek == ::e_seek_set || eseek == ::e_seek_from_end || eseek == ::e_seek_current);
+//      ASSERT(::e_seek_set == SEEK_SET && ::e_seek_from_end == SEEK_END && ::e_seek_current == SEEK_CUR);
+//
+//      ::i32 lLoOffset = offset & 0xffffffff;
+//      //::i32 lHiOffset = (lOff >> 32) & 0xffffffff;
+//
+//      filesize posNew = ::lseek(m_iFile, lLoOffset, (::u32)eseek);
+////      posNew |= ((filesize) lHiOffset) << 32;
+//      if(posNew  == (filesize)-1)
+//      {
+//
+//         auto iError = errno;
+//
+//         auto estatus = errno_to_status(iError);
+//
+//         throw ::file::exception(estatus, 0, iError, m_path, m_eopen);
+//
+//      }
+//
+//      return posNew;
+//   }
+//
+//   filesize file::get_position() const
+//   {
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//
+//      ::i32 lLoOffset = 0;
+////      ::i32 lHiOffset = 0;
+//
+//      filesize pos = ::lseek(m_iFile, lLoOffset, SEEK_CUR);
+//      //    pos |= ((filesize)lHiOffset) << 32;
+//      if(pos  == (filesize)-1)
+//      {
+//
+//         int iError = errno;
+//
+//         auto estatus = errno_to_status(iError);
+//
+//         throw ::file::exception(estatus, 0, iError, m_path, m_eopen);
+//
+//      }
+//
+//      return pos;
+//   }
+//
+//
+//   void file::flush()
+//   {
+//
+//      if (m_iFile == INVALID_FILE)
+//      {
+//
+//         return;
+//
+//      }
+//
+//      auto iRet = ::fsync(m_iFile);
+//
+//      if(iRet < 0)
+//      {
+//
+//         throw file_exception(error_io, errno, m_path, "fsync < 0");
+//
+//      }
+//
+//      /*      ::open
+//            ::read
+//            ::write
+//
+//            access the system directly no buffering : direct I/O - efficient for large writes - innefficient for lots of single byte writes
+//
+//            */
+//
+////      if (m_iFile == INVALID_FILE)
+////         return;
+////
+////      if (!::FlushFileBuffers((HANDLE)m_iFile))
+////         throw_errno(errno, m_path);
+//   }
+//
+//   void file::close()
+//   {
+//
+//      bool bError = false;
+//
+//      if (m_iFile != INVALID_FILE)
+//         bError = ::close(m_iFile) == -1;
+//
+//      m_iFile = INVALID_FILE;
+//
+//      m_path.Empty();
+//
+//      if (bError)
+//      {
+//
+//         auto cerrornumber = c_error_number();
+//
+//         auto estatus = errno_to_status(iErrorNumber);
+//
+//         throw ::file::exception(estatus, 0, iErrorNumber, m_path, m_eopen);
+//
+//      }
+//
+//   }
+//
+//
+//   void file::Abort()
+//   {
+//
+//      if (m_iFile != INVALID_FILE)
+//      {
+//
+//         ::close(m_iFile);
+//
+//         m_iFile = INVALID_FILE;
+//
+//      }
+//
+//      m_path.Empty();
+//
+//   }
+//
+//
+//   void file::LockRange(filesize dwPos, filesize dwCount)
+//   {
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//
+//   }
+//
+//
+//   void file::UnlockRange(filesize dwPos, filesize dwCount)
+//   {
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//
+//   }
+//
+//
+//   void file::set_size(filesize dwNewLen)
+//   {
+//
+//      ASSERT(m_iFile != INVALID_FILE);
+//
+//      set_position(dwNewLen);
+//
+//      if (::ftruncate(m_iFile, dwNewLen) == -1)
+//      {
+//
+//         auto cerrornumber = c_error_number();
+//
+//         auto estatus = errno_to_status(iErrorNumber);
+//
+//         throw ::file::exception(estatus, 0, iErrorNumber, m_path, m_eopen);
+//
+//      }
+//
+//   }
+//
+//
+//   filesize file::get_size() const
+//   {
+//
+//      filesize dwLen, dwCur;
+//
+//      // seek is a non const operation
+//      file* pFile = (file*)this;
+//      dwCur = pFile->get_position();
+//      dwLen = pFile->seek_to_end();
+//      VERIFY(dwCur == (u64)pFile->set_position(dwCur));
+//
+//      return (filesize) dwLen;
+//
+//   }
+//
+//
+//   // file does not support direct buffering (CMemFile does)
+//   u64 file::GetBufferPtr(::u32 /*nCommand*/, u64 /*nCount*/, void ** /*ppBufStart*/, void ** /*ppBufMax*/)
+//   {
+//
+//      //ASSERT(nCommand == bufferCheck);
+//
+//      //UNUSED(nCommand);    // not used in retail build
+//
+//      return 0;   // no support
+//
+//   }
+//
+//
+//   void file::assert_ok() const
+//   {
+//
+//      ::file::file::assert_ok();
+//
+//   }
+//
+//
+//   void file::dump(dump_context & dumpcontext) const
+//   {
+//
+//      ::file::file::dump(dumpcontext);
+//
+//      dumpcontext << "with handle " << (::u32)m_iFile;
+//      dumpcontext << " and name \"" << m_path << "\"";
+//      dumpcontext << "\n";
+//
+//   }
+//
+//
+//
+//   string file::GetFileName() const
+//   {
+//
+//      ::file::file_status status;
+//
+//      GetStatus(status);
+//
+//      return status.m_strFullName.name();
+//
+//   }
+//
+//
+//   string file::GetFileTitle() const
+//   {
+//
+//      ::file::file_status status;
+//
+//      GetStatus(status);
+//
+//      return status.m_strFullName.title();
+//
+//   }
+//
+//
+//   string file::GetFilePath() const
+//   {
+//
+//      ::file::file_status status;
+//
+//      GetStatus(status);
+//
+//      return status.m_strFullName;
+//
+//   }
+//
+//
+//
+//   bool file::GetStatus(::file::file_status& rStatus) const
+//   {
+//
+//
+//      //__memset(&rStatus, 0, sizeof(::file::file_status));
+//
+//      // copy file name from cached m_path
+//      rStatus.m_strFullName = m_path;
+//
+//      if (m_iFile != INVALID_FILE)
+//      {
+//
+//         struct stat st;
+//
+//         if(fstat(m_iFile, &st) == -1)
+//         {
+//
+//            return false;
+//
+//         }
+//
+//         rStatus.m_filesize = st.st_size;
+//
+//         rStatus.m_attribute = 0;
+//
+//         rStatus.m_ctime = ::earth::time(st.st_mtime);
+//         rStatus.m_atime = ::earth::time(st.st_atime);
+//         rStatus.m_mtime = ::earth::time(st.st_ctime);
+//
+//         if (rStatus.m_ctime.get_time() == 0)
+//         {
+//
+//            rStatus.m_ctime = rStatus.m_mtime;
+//
+//         }
+//
+//         if (rStatus.m_atime.get_time() == 0)
+//         {
+//
+//            rStatus.m_atime = rStatus.m_mtime;
+//
+//         }
+//
+//      }
+//      return true;
+//   }
+//
+//
+//   bool file::IsOpened()
+//   {
+//
+//      return m_iFile != INVALID_FILE;
+//
+//   }
+//
+//
+//   void file::SetFilePath(const char * pszNewName)
+//   {
+//
+//
+//      m_path = pszNewName;
+//
+//   }
+//
+//
+//   u64 file::ReadHuge(void * pBuffer, u64 dwCount)
+//   {
+//
+//      return  read(pBuffer, dwCount);
+//
+//   }
+//
+//
+//   void file::WriteHuge(const void * pBuffer, u64 dwCount)
+//   {
+//
+//      write(pBuffer, dwCount);
+//
+//   }
+//
+
+//   int file::put_character_back(int iCharacter)
+//   {
+//
+//      m_iPutCharacter = (int)(byte)iCharacter;
+//
+//      return 0;
+//
+//   }
+
+
+} // namespace acme_haiku
+
+//
+//#define _wcsdec(_cpc1, _cpc2) ((_cpc1)>=(_cpc2) ? nullptr : (_cpc2)-1)
+//
+//#define _wcsinc(_pc)    ((_pc)+1)
+//
+//// turn a file, relative path or other into an absolute path
+//bool CLASS_DECL_ACME vfxFullPath(wstring & wstrFullPath, const wstring & wstrPath)
+//// pszPathOut = buffer of _MAX_PATH
+//
+//// pszFileIn = file, relative path or absolute path
+//
+//// (both in ANSI character set)
+//{
+//
+//
+//   wstrFullPath = wstrPath;
+//
+//
+//   return true;
+//}
+//
+//
+//CLASS_DECL_ACME void vfxGetModuleShortFileName(void * hInst, string& strShortName)
+//{
+//
+//   link_map * plm;
+//
+//   dlinfo(hInst, RTLD_DI_LINKMAP, &plm);
+//
+//   strShortName = plm->l_name;
+//
+//
+//}
+//
+//
+//CLASS_DECL_ACME bool vfxResolveShortcut(string & strTarget, const char * pszSource, __pointer(::user::primitive) puiMessageParentOptional)
+//{
+//
+//
+//
+//   char realname[_POSIX_PATH_MAX * 4];
+//   i32 rc = 0;
+//
+//   if(realpath(pszSource, realname) == 0)
+//      return false;
+//
+//   strTarget = realname;
+//
+//   return true;
+//
+//}
+//
+//
+//

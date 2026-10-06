@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="simple">
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/app/app_app.cbp">
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/aura/aura.cbp" />
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/imaging_freeimage/imaging_freeimage.cbp" />
+		</Project>
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/shader/app_shader.cbp">
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/aura/aura.cbp" />
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/gpu_opengl/gpu_opengl.cbp" />
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/imaging_freeimage/imaging_freeimage.cbp" />
+		</Project>
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/aura/aura.cbp">
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/third/sn/sn.cbp" />
+		</Project>
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/draw2d_cairo/cairo.cbp">
+			<Depends filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/gpu_opengl/gpu_opengl.cbp" />
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/app/imaging_freeimage/imaging_freeimage.cbp" />
+		<Project filename="../../../../../../usr/home/camilo/__archive/myca2-test/third/sn/sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

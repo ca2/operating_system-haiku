@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="simple">
+		<Project filename="../../app-simple/form/simple_form.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_tranquillum/experience_tranquillum.cbp" />
+			<Depends filename="../../app/freeimage_imaging/freeimage_imaging.cbp" />
+		</Project>
+		<Project filename="../../app-simple/os_drag_and_drop/simple_os_drag_and_drop.cbp" />
+		<Project filename="../app/app.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../third/sn/sn.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/cairo.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/experience_core/experience_core.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/experience_tranquillum/experience_tranquillum.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/freeimage_imaging/freeimage_imaging.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../third/sn/sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

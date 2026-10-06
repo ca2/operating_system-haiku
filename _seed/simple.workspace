@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="simple">
+		<Project filename="../app/app.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/shader/app_shader.cbp" />
+		<Project filename="../../app-complex/drawing/complex_drawing.cbp">
+			<Depends filename="../../app-simple/drawing/simple_drawing.cbp" />
+		</Project>
+		<Project filename="../../app-simple/application/simple_application.cbp">
+			<Depends filename="../app/app.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_core/experience_core.cbp" />
+			<Depends filename="../../app/imaging_freeimage/imaging_freeimage.cbp" />
+			<Depends filename="../../third/sn/sn.cbp" />
+		</Project>
+		<Project filename="../../app-simple/box/simple_box.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_core/experience_core.cbp" />
+		</Project>
+		<Project filename="../../app-simple/drawing/simple_drawing.cbp">
+			<Depends filename="../app/app.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_core/experience_core.cbp" />
+		</Project>
+		<Project filename="../../app-simple/notify_drawing/notify_drawing.cbp">
+			<Depends filename="../../app-simple/drawing/simple_drawing.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/experience_core/experience_core.cbp" />
+		</Project>
+		<Project filename="../../app-simple/shader/simple_shader.cbp">
+			<Depends filename="../../app/shader/app_shader.cbp" />
+			<Depends filename="../app/app.cbp" />
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/draw2d_cairo/cairo.cbp" />
+			<Depends filename="../../app/experience_core/experience_core.cbp" />
+			<Depends filename="../../app/gpu_opengl/gpu_opengl.cbp" />
+		</Project>
+		<Project filename="../../app/aura/aura.cbp">
+			<Depends filename="../../third/sn/sn.cbp" />
+		</Project>
+		<Project filename="../../app/axis/axis.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/base/base.cbp">
+			<Depends filename="../../app/axis/axis.cbp" />
+		</Project>
+		<Project filename="../../app/core/core.cbp">
+			<Depends filename="../../app/base/base.cbp" />
+		</Project>
+		<Project filename="../../app/draw2d_cairo/cairo.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/experience_core/experience_core.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+			<Depends filename="../../app/core/core.cbp" />
+		</Project>
+		<Project filename="../../app/experience_tranquillum/experience_tranquillum.cbp">
+			<Depends filename="../../app/aura/aura.cbp" />
+		</Project>
+		<Project filename="../../app/gpu_opengl/gpu_opengl.cbp" />
+		<Project filename="../../app/imaging_freeimage/imaging_freeimage.cbp" />
+		<Project filename="../../third/sn/sn.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
