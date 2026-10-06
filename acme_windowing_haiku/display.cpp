@@ -1,0 +1,1155 @@
+//
+// Created by camilo on 21/02/2022 23:15 <3ThomasBorregaardSorensen!!
+//
+#include "platform.h"
+#include "display.h"
+#include "window.h"
+#include "acme/constant/windowing2.h"
+#include "acme/parallelization/mutex.h"
+#include "acme/parallelization/synchronous_lock.h"
+#include "acme/platform/acme.h"
+#include "acme/platform/node.h"
+#include "acme/platform/system.h"
+//#include "acme/prototype/geometry2d/rectangle.h"
+//#include "acme/user/micro/window.h"
+#include "acme/windowing/windowing.h"
+#include "acme_windowing_g/gdk_3_and_4.h"
+
+
+//#include "windowing_system_x11/_.h"
+
+
+#ifdef OPENBSD
+
+#include <stdio.h>
+
+#endif
+
+
+//#define MAXSTR 1000
+
+
+//::e_status defer_initializex_x11();
+
+
+//int x11_init_threads();
+//Display * x11_get_display();
+
+
+void set_main_user_thread();
+
+
+namespace gtk3
+{
+
+
+   namespace acme
+   {
+
+
+      namespace windowing
+      {
+
+         //display * display::g_p = nullptr;
+
+
+         display::display()
+         {
+
+            //m_pdisplay = nullptr;
+
+            m_bUnhook = false;
+
+            //            if(!g_p)
+            //            {
+            //
+            //               g_p = this;
+            //
+            //            }
+
+            defer_create_synchronization();
+
+
+         }
+
+
+         display::~display()
+         {
+
+
+         }
+
+
+         //         Atom display::intern_atom(const_char_pointer pszAtomName, bool bCreate)
+         //         {
+         //
+         //            return _intern_atom_unlocked(scopedstrAtomName, bCreate);
+         //
+         //            //      if (m_pdisplay == nullptr)
+         //            //      {
+         //            //
+         //            //         return 0;
+         //            //
+         //            //      }
+         //            //
+         //            //      auto atom = XInternAtom(m_pdisplay, pszAtomName, bCreate ? True : False);
+         //            //
+         //            //      if (atom == None)
+         //            //      {
+         //            //
+         //            //         windowing_output_debug_string("ERROR: cannot find atom for " + string(scopedstrAtomName) + "\n");
+         //            //
+         //            //         return None;
+         //            //
+         //            //      }
+         //            //
+         //            //      return atom;
+         //
+         //         }
+         //
+         //
+         //         Atom display::intern_atom(enum_atom eatom, bool bCreate)
+         //         {
+         //
+         //            return _intern_atom_unlocked(eatom, bCreate);
+         //
+         //            //      if (eatom < 0 || eatom >= e_atom_count)
+         //            //      {
+         //            //
+         //            //         return None;
+         //            //
+         //            //      }
+         //            //
+         //            //      Atom atom = id()map_base[eatom];
+         //            //
+         //            //      if (atom == None)
+         //            //      {
+         //            //
+         //            //         atom = intern_atom(atom_name(eatom), bCreate);
+         //            //
+         //            //         id()map_base[eatom] = atom;
+         //            //
+         //            //      }
+         //            //
+         //            //      return atom;
+         //
+         //         }
+         //
+         //
+         //
+         //         Atom display::_intern_atom_unlocked(const_char_pointer pszAtomName, bool bCreate)
+         //         {
+         //
+         //            if (m_pdisplay == nullptr)
+         //            {
+         //
+         //               return 0;
+         //
+         //            }
+         //
+         //            auto atom = XInternAtom(m_pdisplay, pszAtomName, bCreate ? True : False);
+         //
+         //            if (atom == None)
+         //            {
+         //
+         //               windowing_output_debug_string("ERROR: cannot find atom for " + string(scopedstrAtomName) + "\n");
+         //
+         //               return None;
+         //
+         //            }
+         //
+         //            return atom;
+         //
+         //         }
+         //
+         //
+         //         Atom display::_intern_atom_unlocked(enum_atom eatom, bool bCreate)
+         //         {
+         //
+         //            if (eatom < 0 || eatom >= e_atom_count)
+         //            {
+         //
+         //               return None;
+         //
+         //            }
+         //
+         //            Atom atom = id()map_base[eatom];
+         //
+         //            if (atom == None)
+         //            {
+         //
+         //               atom = _intern_atom_unlocked(atom_name(eatom), bCreate);
+         //
+         //               id()map_base[eatom] = atom;
+         //
+         //            }
+         //
+         //            return atom;
+         //
+         //         }
+         //
+         //
+         //         unsigned char* display::_get_string_property(Display * display, Window window, char* property_name)
+         //         {
+         //
+         //            unsigned char * prop;
+         //            Atom actual_type, filter_atom;
+         //            int actual_format, status;
+         //            unsigned long nitems, bytes_after;
+         //
+         //            filter_atom = XInternAtom(display, property_name, True);
+         //
+         //            status = XGetWindowProperty(display, window, filter_atom, 0, MAXSTR, False, AnyPropertyType,
+         //                                        &actual_type, &actual_format, &nitems, &bytes_after, &prop);
+         //
+         //            x11_check_status(status, window);
+         //
+         //            return prop;
+         //
+         //         }
+         //
+         //
+         //         unsigned long display::_get_long_property(Display *d, Window w, char *property_name)
+         //         {
+         //
+         //            unsigned char *prop = _get_string_property(d, w, property_name);
+         //
+         //            unsigned long long_property = prop[0] + (prop[1] << 8) + (prop[2] << 16) + (prop[3] << 24);
+         //
+         //            XFree(prop);
+         //
+         //            return long_property;
+         //
+         //         }
+
+
+         //         Window display::_get_active_window()
+         //         {
+         //
+         //            int screen = XDefaultScreen(m_pdisplay);
+         //
+         //            Window windowRoot = RootWindow(m_pdisplay, screen);
+         //
+         //            Window window = _get_long_property(m_pdisplay, windowRoot, (char *) "_NET_ACTIVE_WINDOW");
+         //
+         //            return window;
+         //
+         //         }
+
+
+         //         Window display::window_from_name_search(Display *display, Window current, char const *needle, int iOffset, int depth)
+         //         {
+         //
+         //            Window window, root, parent, *children;
+         //
+         //            unsigned children_count;
+         //
+         //            char *name = NULL;
+         //
+         //            window = 0;
+         //
+         //            /* If it does not: check all subwindows recursively. */
+         //            if(0 != XQueryTree(display, current, &root, &parent, &children, &children_count))
+         //            {
+         //
+         //               unsigned i;
+         //
+         //               for(i = 0; i < children_count; ++i)
+         //               {
+         //
+         //                  /* Check if this window has the name we seek */
+         //                  if(XFetchName(display,  children[i], &name) > 0)
+         //                  {
+         //
+         //                     int r = ansi_cmp(needle, name);
+         //
+         //                     XFree(name);
+         //
+         //                     if(r == 0)
+         //                     {
+         //
+         //                        window = children[i+iOffset];
+         //
+         //                        break;
+         //
+         //                     }
+         //
+         //                  }
+         //
+         //                  if(depth > 1)
+         //                  {
+         //
+         //                     Window win = window_from_name_search(display, children[i], needle, depth - 1);
+         //
+         //                     if (win != 0)
+         //                     {
+         //
+         //                        window = win;
+         //
+         //                        break;
+         //
+         //                     }
+         //
+         //                  }
+         //
+         //               }
+         //
+         //               XFree(children);
+         //
+         //            }
+         //
+         //            return window;
+         //
+         //         }
+         //
+         //
+         //         Window display::window_from_name(char const *name, int iOffset, int depth)
+         //         {
+         //
+         //            auto display = m_pdisplay;
+         //
+         //            auto windowRoot = XDefaultRootWindow(display);
+         //
+         //            auto window = window_from_name_search(display, windowRoot, name, iOffset, depth);
+         //
+         //            return window;
+         //
+         //         }
+         //
+         //
+         //         display * display_get(::particle * pparticle, bool bBranch, Display * pdisplay)
+         //         {
+         //
+         //            critical_section_lock lock(pparticle->::system()->globals_critical_section());
+         //
+         //            if (display::g_p == nullptr)
+         //            {
+         //
+         //               auto p = ___new display();
+         //
+         //               p->initialize(pparticle);
+         //
+         //               p->add_listener(p);
+         //
+         //               p->m_pdisplay = pdisplay;
+         //
+         //               if(bBranch)
+         //               {
+         //
+         //                  p->branch_synchronously();
+         //
+         //               }
+         //               else
+         //               {
+         //
+         //                  p->init_task();
+         //
+         //               }
+         //
+         //            }
+         //
+         //            return display::g_p;
+         //
+         //         }
+         //
+         //
+         //         void display::add_listener(event_listener * plistener)
+         //         {
+         //
+         //            synchronous_lock synchronouslock(this->synchronization(), DEFAULT_SYNCHRONOUS_LOCK_SUFFIX);
+         //
+         //            m_happeninglistenera.add(plistener);
+         //
+         //         }
+         //
+         //
+         //         void display::add_window(micro::interchange * pwindow)
+         //         {
+         //
+         //            synchronous_lock synchronouslock(this->synchronization(), DEFAULT_SYNCHRONOUS_LOCK_SUFFIX);
+         //
+         //            m_windowa.add(pwindow);
+         //
+         //         }
+         //
+         //
+         //         void display::erase_listener(event_listener * plistener)
+         //         {
+         //
+         //            synchronous_lock synchronouslock(this->synchronization(), DEFAULT_SYNCHRONOUS_LOCK_SUFFIX);
+         //
+         //            m_happeninglistenera.erase(plistener);
+         //
+         //         }
+         //
+         //
+         //         void display::erase_window(::x11::micro::elemental * pwindow)
+         //         {
+         //
+         //            synchronous_lock synchronouslock(this->synchronization(), DEFAULT_SYNCHRONOUS_LOCK_SUFFIX);
+         //
+         //            m_windowa.erase(pwindow);
+         //
+         //         }
+
+
+         bool display::message_loop_step()
+         {
+
+            //            if(::is_null(m_pdisplay))
+            //            {
+            //
+            //               return false;
+            //
+            //            }
+
+            //            if (!XPending(m_pdisplay))
+            //            {
+            //
+            //               return false;
+            //
+            //            }
+            //
+            //            XEvent happening{};
+            //
+            //            XNextEvent(m_pdisplay, &happening);
+            //
+            //            x11_event(&happening);
+
+            return true;
+
+         }
+
+
+         //         bool display::x11_posted()
+         //         {
+         //
+         //            return display_posted_routine_step();
+         //
+         //         }
+         //
+         //
+         //         bool display::x11_event(XEvent * pevent)
+         //         {
+         //
+         //            bool bHandled = false;
+         //
+         //            ::collection::index i = 0;
+         //
+         //            _synchronous_lock synchronouslock(this->synchronization(), DEFAULT_SYNCHRONOUS_LOCK_SUFFIX);
+         //
+         //            for (; i < m_happeninglistenera.get_count(); i++)
+         //            {
+         //
+         //               auto plistener = m_happeninglistenera[i];
+         //
+         //               synchronouslock.unlock();
+         //
+         //               if(i == 0)
+         //               {
+         //
+         //                  if (plistener->_on_event(pevent))
+         //                  {
+         //
+         //                     bHandled = true;
+         //
+         //                     break;
+         //
+         //                  }
+         //
+         //               }
+         //               else
+         //               {
+         //
+         //                  if (plistener->_on_event(pevent))
+         //                  {
+         //
+         //                     bHandled = true;
+         //
+         //                     break;
+         //
+         //                  }
+         //
+         //               }
+         //
+         //               synchronouslock._lock();
+         //
+         //            }
+         //
+         //            return bHandled;
+         //
+         //         }
+
+
+         void display::message_loop()
+         {
+
+            bool bHandled1;
+
+            bool bHandled2;
+
+            information() << "x11::acme::windowing::display::message_loop";
+
+            while (::task_get_run())
+            {
+
+               if (m_bUnhook)
+               {
+
+                  break;
+
+               }
+
+               bHandled1 = false;
+
+               bHandled2 = false;
+
+               while (message_loop_step())
+               {
+
+                  bHandled1 = true;
+
+               }
+
+               //               if(!bHandled1)
+               //               {
+               //
+               //                  bHandled2 = x11_posted();
+               //
+               //               }
+
+               if (!bHandled1 && !bHandled2)
+               {
+
+                  preempt(5_ms);
+
+               }
+
+            }
+
+            information() << "Finished display::message_loop for nano::display";
+
+         }
+
+
+         void display::init_task()
+         {
+
+            informationf("x11 nano display init_task");
+
+            //~ if(::windowing::get_ewindowing() == ::windowing::e_windowing_none)
+            //~ {
+
+            //~ //set_main_user_thread();
+
+            //~ ::windowing::get_ewindowing() = e_windowing_x11;
+
+            //~ }
+
+            // printf("\n\nx11::display::init_task Going to call x11_defer_initialize\n\n");
+            //
+            // fflush(stdout);
+            //
+            // node()->x11_defer_initialize();
+
+            //            if(!m_pdisplay)
+            //            {
+            //
+            //               set_X11_Display((Display *) system()->acme_windowing()->get_display());
+            //
+            //            }
+
+         }
+
+
+         //         void display::set_X11_Display(Display * pdisplay)
+         //         {
+         //
+         //            m_pdisplay = pdisplay;
+         //
+         //            if (!m_pdisplay)
+         //            {
+         //
+         //               throw ::exception(error_null_pointer);
+         //
+         //            }
+         //
+         //            ::i32_rectangle rectangleMainScreen;
+         //
+         //            auto pscreen = DefaultScreenOfDisplay(m_pdisplay);
+         //
+         //            int wScreen = WidthOfScreen(pscreen);
+         //            int hScreen = HeightOfScreen(pscreen);
+         //
+         //            //printf("::x11::display::init_task pscreen=%" PRIxPTR "\n", pscreen);
+         //            //printf("::x11::display::init_task (wScreen,hScreen)=%d,%d\n", wScreen, hScreen);
+         //
+         //            //rectangleMainScreen.left = 0;
+         //            //rectangleMainScreen.top = 0;
+         //            //rectangleMainScreen.right = wScreen;
+         //            //rectangleMainScreen.bottom = hScreen;
+         //
+         //            //operating_system_set_main_screen_rectangle(rectangleMainScreen);
+         //
+         //         }
+
+
+         bool display::is_branch_current() const
+         {
+
+            if (!m_bUnhook && ::object::is_branch_current())
+            {
+
+               return true;
+
+            }
+
+            if (m_bUnhook && ::is_main_thread())
+            {
+
+               return true;
+
+            }
+
+            return false;
+
+         }
+
+
+         void display::run()
+         {
+
+            ::task_set_name("x11:display:run");
+
+            information() << "x11::display::run";
+
+            //set_main_user_thread();
+
+            message_loop();
+
+            //            if (m_pdisplay != nullptr)
+            //            {
+            //
+            //               XCloseDisplay(m_pdisplay);
+            //
+            //               m_pdisplay = nullptr;
+            //
+            //            }
+
+         }
+
+
+         //         bool display::_on_event(XEvent * pevent)
+         //         {
+         //
+         //            if (pevent->xany.window == DefaultRootWindow(m_pdisplay))
+         //            {
+         //
+         //               if(pevent->xany.type == PropertyNotify)
+         //               {
+         //
+         //                  Atom atom = XInternAtom(m_pdisplay, "_NET_ACTIVE_WINDOW", False);
+         //
+         //                  if (atom == pevent->xproperty.atom)
+         //                  {
+         //
+         //                     auto windowActive = m_windowActive;
+         //
+         //                     for(auto & pwindow : m_windowa)
+         //                     {
+         //
+         //                        bool bNcActive = windowActive == pwindow->m_window;
+         //
+         //                        if (is_different(bNcActive, pwindow->m_pinterface->m_bNcActive))
+         //                        {
+         //
+         //                           pwindow->m_pinterface->m_bNcActive = bNcActive;
+         //
+         //                           pwindow->redraw();
+         //
+         //                        }
+         //
+         //                     }
+         //
+         //                     m_windowActive = windowActive;
+         //
+         //                  }
+         //
+         //               }
+         //
+         //            }
+         //
+         //            return false;
+         //
+         //         }
+
+
+         ::i32_size display::get_main_screen_size()
+         {
+
+            //            auto snum = DefaultScreen(m_pdisplay);
+            //
+            //            auto width = DisplayWidth(m_pdisplay, snum);
+            //
+            //            auto height = DisplayHeight(m_pdisplay, snum);
+
+            return {1920, 1080};
+
+         }
+
+
+         // void * x11_get_display(::particle * pparticle)
+         // {
+         //
+         //    auto pdisplay = ::x11::display::get(pparticle, false);
+         //
+         //    return pdisplay->m_pdisplay;
+         //
+         // }
+
+
+
+         void display::_gtk3_release_mouse_capture()
+         {
+
+            GdkDisplay* display = gdk_display_get_default();
+            if (display)
+            {
+               GdkSeat* seat = gdk_display_get_default_seat(display);
+               if (seat)
+               {
+                  GdkDevice* pointer_device = gdk_seat_get_pointer(seat);
+                  if (pointer_device)
+                  {
+                     gdk_device_ungrab(pointer_device, GDK_CURRENT_TIME);
+                     g_print("Pointer ungrabbed.\n");
+                  }
+               }
+            }
+
+         }
+
+
+         bool display::is_dark_mode_through_theming()
+         {
+
+            auto edesktop = ::windowing::get_eoperating_ambient();
+
+            switch(edesktop)
+            {
+               case ::windowing::e_operating_ambient_gnome:
+               return false;
+               case ::windowing::e_operating_ambient_cinnamon:
+                  return true;
+               case ::windowing::e_operating_ambient_mate:
+                  return true;
+               case ::windowing::e_operating_ambient_lxde:
+                  return false; // don't know yet
+               case ::windowing::e_operating_ambient_xfce:
+                  return true;
+               case ::windowing::e_operating_ambient_kde:
+                  return true;
+               default:
+                  return false;
+            }
+         }
+
+
+         string display::theming_ui_name()
+         {
+
+            auto edesktop = ::windowing::get_eoperating_ambient();
+
+            switch(edesktop)
+            {
+               case ::windowing::e_operating_ambient_kde:
+                  return "KDE Plasma Global Theme";
+               case ::windowing::e_operating_ambient_cinnamon:
+                  return "Linux Mint Cinnamon Global Theme";
+               case ::windowing::e_operating_ambient_mate:
+                  return "MATE GTK Theme";
+               default:
+                  return ::acme::windowing::display::theming_ui_name();
+            };
+
+         }
+
+
+
+         void display::impl_set_desktop_theme(const ::scoped_string& scopedstrDesktopTheme)
+         {
+
+            // https://ubuntuforums.org/showthread.php?t=2140488
+            // gsettings set org.gnome.desktop.interface gtk-theme your_theme
+
+            // indirect wall-changer sourceforge.net contribution
+
+            //auto psystem = system();
+
+            //auto pnode = psystem->node();
+
+            ::string strDesktopTheme;
+
+            strDesktopTheme = scopedstrDesktopTheme;
+
+            auto edesktop = ::windowing::get_eoperating_ambient();
+
+            if (edesktop == ::windowing::e_operating_ambient_gnome)
+            {
+
+               bool bOk1 = ::gdk::gsettings_set("org.gnome.desktop.interface", "gtk-theme", strDesktopTheme).ok();
+
+               bool bOk2 = true;
+
+               //if(::file::system_short_name().case_insensitive_contains("manjaro"))
+               {
+
+                  bOk2 = ::gdk::gsettings_set("org.gnome.desktop.wm.preferences", "theme", strDesktopTheme).ok();
+
+               }
+
+               sleep(300_ms);
+
+               ::gdk::gsettings_sync();
+
+               sleep(300_ms);
+
+               if (!bOk1 || !bOk2)
+               {
+
+                  throw ::exception(error_failed);
+
+               }
+
+            }
+            else if (edesktop == ::windowing::e_operating_ambient_cinnamon)
+            {
+
+               ::gdk::gsettings_set("org.cinnamon.desktop.interface", "gtk-theme", scopedstrDesktopTheme);
+
+            }
+            else if (edesktop == ::windowing::e_operating_ambient_mate)
+            {
+
+               if (!::gdk::gsettings_set("org.mate.interface", "gtk-theme", strDesktopTheme).ok())
+               {
+                  throw ::exception(error_failed);
+               }
+               ::gdk::gsettings_sync();
+
+            }
+            else if (edesktop == ::windowing::e_operating_ambient_lxde)
+            {
+
+
+               //call_async("pcmanfm", "-w " + strLocalImagePath, nullptr, e_display_none, false);
+
+            }
+            else if (edesktop & ::windowing::e_operating_ambient_xfce)
+            {
+               //        Q_FOREACH(QString entry, Global::getOutputOfCommand("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << "/backdrop" << "-l").split("\n")){
+               //          if(entry.contains("image-path") || entry.contains("last-image")){
+               //            QProcess::startDetached("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << entry << "-s" << image);
+               //      }
+               //}
+               xfce4_set_user_theme(strDesktopTheme);
+               //warning() <<"Failed to set operating system theme wallpaper. If your Desktop Environment is not listed at \"Preferences->Integration-> Current Desktop Environment\", then it is not supported.";
+
+               //return error_failed;
+
+            }
+
+            //      return ::success;
+
+         }
+
+
+   string display::impl_get_desktop_theme()
+   {
+
+
+      // https://ubuntuforums.org/showthread.php?t=2140488
+      // gsettings set org.gnome.desktop.interface gtk-theme your_theme
+
+      // indirect wall-changer sourceforge.net contribution
+
+      string strDesktopTheme;
+
+      bool bOk = false;
+
+
+            auto edesktop = ::windowing::get_eoperating_ambient();
+
+      switch (edesktop)
+      {
+
+         case ::windowing::e_operating_ambient_gnome:
+         //case ::windowing::e_operating_ambient_ubuntu_gnome:
+         //case ::windowing::e_operating_ambient_unity_gnome:
+
+            bOk = ::gdk::gsettings_get(strDesktopTheme, "org.gnome.desktop.interface", "gtk-theme").ok();
+
+            break;
+         case ::windowing::e_operating_ambient_cinnamon:
+
+            bOk = ::gdk::gsettings_get(strDesktopTheme, "org.cinnamon.desktop.interface", "gtk-theme").ok();
+
+         break;
+         case ::windowing::e_operating_ambient_mate:
+
+            bOk = ::gdk::gsettings_get(strDesktopTheme, "org.mate.interface", "gtk-theme").ok();
+
+            break;
+
+         case ::windowing::e_operating_ambient_lxde:
+
+            //call_async("pcmanfm", "-w " + strLocalImagePath, nullptr, e_display_none, false);
+
+            break;
+
+         case ::windowing::e_operating_ambient_xfce:
+         {
+            //        Q_FOREACH(QString entry, Global::getOutputOfCommand("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << "/backdrop" << "-l").split("\n")){
+            //          if(entry.contains("image-path") || entry.contains("last-image")){
+            //            QProcess::startDetached("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << entry << "-s" << image);
+            //      }
+            //}
+            strDesktopTheme = xfce4_get_user_theme();
+
+         }
+
+            break;
+
+         default:
+
+            warningf(
+                    "Failed to get user theme setting. If your Desktop Environment is not listed at \"Preferences->Integration-> Current Desktop Environment\", then it is not supported.");
+            //return "";
+         break;
+
+      }
+
+      return strDesktopTheme;
+
+   }
+
+
+         void display::set_desktop_icon_theme(const ::scoped_string& scopedstrUserIconTheme)
+         {
+
+            // https://ubuntuforums.org/showthread.php?t=2140488
+            // gsettings set org.gnome.desktop.interface gtk-theme your_theme
+
+            // indirect wall-changer sourceforge.net contribution
+
+            // auto psystem = system();
+            //
+            // auto pnode = psystem->node();
+
+            ::string strDesktopIconTheme;
+
+            strDesktopIconTheme = scopedstrUserIconTheme;
+
+            auto edesktop = ::windowing::get_eoperating_ambient();
+
+            if (edesktop & ::windowing::e_operating_ambient_gnome)
+            {
+
+               bool bOk1 = ::gdk::gsettings_set("org.gnome.desktop.interface", "icon-theme", strDesktopIconTheme).ok();
+
+               //bool bOk2 = true;
+
+               //         //if(::file::system_short_name().case_insensitive_contains("manjaro"))
+               //         {
+               //
+               //            bOk2 = gsettings_set("org.gnome.desktop.wm.preferences", "theme", strUserTheme);
+               //
+               //         }
+
+               sleep(300_ms);
+
+               ::gdk::gsettings_sync();
+
+               sleep(300_ms);
+
+               //if (!bOk1 || !bOk2)
+               if (!bOk1)
+               {
+
+                  information() << "failed to set os user icon theme";
+
+
+               }
+
+            }
+            else if (edesktop == ::windowing::e_operating_ambient_mate)
+            {
+
+               //return ::user::gsettings_set("org.mate.background", "picture-filename", strLocalImagePath);
+
+            }
+            else if (edesktop == ::windowing::e_operating_ambient_lxde)
+            {
+
+
+               //call_async("pcmanfm", "-w " + strLocalImagePath, nullptr, e_display_none, false);
+
+            }
+            else if (edesktop == ::windowing::e_operating_ambient_xfce)
+            {
+               //        Q_FOREACH(QString entry, Global::getOutputOfCommand("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << "/backdrop" << "-l").split("\n")){
+               //          if(entry.contains("image-path") || entry.contains("last-image")){
+               //            QProcess::startDetached("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << entry << "-s" << image);
+               //      }
+               //}
+
+               warning() <<
+                  "Failed to set operating system theme wallpaper. If your Desktop Environment is not listed at \"Preferences->Integration-> Current Desktop Environment\", then it is not supported.";
+
+               //return error_failed;
+
+            }
+
+  //          return ::success;
+//
+         }
+
+
+         //   void node::os_process_user_theme(const ::scoped_string & scopedstrTheme)
+         //   {
+         //
+         //      _os_process_user_theme(strTheme);
+         //
+         //   }
+
+
+         // void display::impl_set_wallpaper(::collection::index iScreen, const ::scoped_string & scopedstrLocalImagePath)
+         // {
+         //
+         //    // wall-changer sourceforge.net contribution
+         //
+         //    // auto psystem = system();
+         //    //
+         //    // auto pnode = psystem->node();
+         //
+         //    //auto edesktop = pnode->get_eoperating_ambient();
+         //
+         //    ::string strLocalImagePath;
+         //
+         //    strLocalImagePath = scopedstrLocalImagePath;
+         //
+         //    auto edesktop = ::windowing::get_eoperating_ambient();
+         //
+         //    bool bDark = m_strDarkModeAnnotation.case_insensitive_contains("dark");
+         //
+         //    switch (edesktop)
+         //    {
+         //
+         //       case ::windowing::e_operating_ambient_gnome:
+         //       //case ::user::e_operating_ambient_ubuntu_gnome:
+         //       case ::windowing::e_operating_ambient_unity:
+         //       {
+         //
+         //          if (bDark)
+         //          {
+         //
+         //             ::gdk::gsettings_set("org.gnome.desktop.background", "picture-uri-dark",
+         //                                         "file://" + strLocalImagePath);
+         //
+         //          }
+         //          else
+         //          {
+         //
+         //             ::gdk::gsettings_set("org.gnome.desktop.background", "picture-uri",
+         //                                         "file://" + strLocalImagePath);
+         //
+         //          }
+         //
+         //       }
+         //       break;
+         //       case ::windowing::e_operating_ambient_mate:
+         //
+         //           ::gdk::gsettings_set("org.mate.background", "picture-filename", strLocalImagePath);
+         //
+         //       break;
+         //
+         //       case ::windowing::e_operating_ambient_lxde:
+         //
+         //          node()->call_async("pcmanfm", "-w " + strLocalImagePath, nullptr, e_display_none, false);
+         //
+         //          break;
+         //
+         //       case ::windowing::e_operating_ambient_xfce:
+         //       {
+         //
+         //          xfce4_set_wallpaper(strLocalImagePath);
+         //          //        Q_FOREACH(QString entry, Global::getOutputOfCommand("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << "/backdrop" << "-l").split("\n")){
+         //          //          if(entry.contains("image-path") || entry.contains("last-image")){
+         //          //            QProcess::startDetached("xfconf-query", QStringList() << "-c" << "xfce4-desktop" << "-point" << entry << "-s" << image);
+         //          //      }
+         //          //}
+         //
+         //       }
+         //
+         //       break;
+         //
+         //       default:
+         //
+         //          warning() <<
+         //             "Failed to change wallpaper. If your Desktop Environment is not listed at \"Preferences->Integration-> Current Desktop Environment\", then it is not supported.";
+         //          //return false;
+         //       break;
+         //
+         //    }
+         //
+         //    //return true;
+         //
+         // }
+
+
+         void display::_enumerate_monitors()
+         {
+            information() << "windowing_gtk3::display::open_display";
+
+            m_rectanglea.clear();
+
+            m_pgdkdisplay = gdk_display_get_default();
+
+            int n_monitors = gdk_display_get_n_monitors(m_pgdkdisplay);
+
+            for(int i = 0; i < n_monitors; ++i)
+            {
+               GdkMonitor * monitor = gdk_display_get_monitor(m_pgdkdisplay, i);
+
+               if(!monitor)
+               {
+                  continue;
+               }
+
+               GdkRectangle geometry;
+               gdk_monitor_get_geometry(monitor, &geometry);
+
+               int cx = geometry.width;
+               int cy = geometry.height;
+
+               informationf(
+                  "Monitor %d: x = %d, y = %d, width = %d, height = %d\n",
+                  i, geometry.x, geometry.y, geometry.width, geometry.height);
+
+               m_rectanglea.add({geometry.x, geometry.y, cx, cy});
+
+               // Do NOT g_object_unref(monitor) in GTK3 here.
+               // gdk_display_get_monitor() does not give you a new reference.
+            }
+         }
+
+      } // namespace windowing
+
+
+   } // namespace acme
+
+
+} // namespace gtk3
+
+
+

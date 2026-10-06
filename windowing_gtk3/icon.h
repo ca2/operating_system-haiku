@@ -1,0 +1,58 @@
+// created by Camilo <3CamiloSasukeThomasBorregaardSoerensen - Honoring Thomas Borregaard Soerensen My ONLY GOD
+// recreated by Camilo 2021-02-01 16:38
+#pragma once
+
+
+#include "aura/windowing/icon.h"
+//#include "acme/prototype/geometry2d/_geometry2d.h"
+#include "acme/prototype/geometry2d/size_array.h"
+
+
+namespace windowing_gtk3
+{
+
+
+   class CLASS_DECL_WINDOWING_GTK3 icon :
+      virtual public ::windowing::icon
+   {
+   public:
+
+
+      //array < concrete < ::i32_size > >         m_sizea;
+
+      i32_size_array                               m_sizea;
+      void * m_pGtkPixbuf = nullptr;
+
+
+      icon();
+      ~icon() override;
+
+
+      string get_tray_icon_name() const override;
+
+
+      void set_tray_icon_name(const ::scoped_string & scopedstrTrayIconName) override;
+
+
+      void get_sizes(::i32_size_array & a) override;
+
+
+      void * get_os_data(const ::i32_size & size) const override;
+
+
+      void set_matter(const ::scoped_string & scopedstrPath) override;
+      void set_app_tray_icon(const ::scoped_string & scopedstrPath) override;
+      void set_file(const ::payload & payloadFile) override;
+
+
+      virtual ::image::image_pointer get_image(const ::i32_size & size) override;
+
+      
+   };
+
+
+
+} // namespace windowing
+
+
+

@@ -1,0 +1,98 @@
+//
+// Created by camilo on 2024-05-26 21:59 <3ThomasBorregaardSorensen!!
+//
+#pragma once
+
+
+#include "acme_windowing_g/windowing.h"
+
+
+namespace gtk3
+{
+
+
+   namespace acme
+   {
+
+
+      namespace windowing
+      {
+
+
+	
+      class CLASS_DECL_ACME_WINDOWING_GTK3 windowing :
+           virtual public ::g::acme::windowing::windowing
+   {
+   public:
+
+      //::procedure             m_callbackOnActivateGtkApplication;
+      GtkApplication *        m_pgtkapplication;
+
+      map_base < GtkWindow * , ::pointer < ::gtk3::acme::windowing::window> > m_windowmap;
+
+
+      windowing();
+      ~windowing() override;
+
+::windowing::enum_bias calculate_windowing_bias() override;
+
+      void windowing_application_on_system_start() override;
+
+      //::e_status defer_initialize_windowing_system() override;
+      void initialize_windowing() override;
+
+      //void windowing_application_main_loop() override;
+         //void _on_activate_gtk_application() override;
+
+      void run() override;
+      
+         void windowing_post_quit() override;
+
+               bool shell_open(const ::file::path & path) override;
+
+
+      ::gtk3::acme::windowing::window * _window(GtkWindow * pgtkwindow);
+      void _set_window(GtkWindow * pgtkwindow, ::gtk3::acme::windowing::window * pgtk3acmewindowingwindow);
+
+      ::acme::windowing::display * acme_display() override;
+
+
+      // void _user_send(const ::procedure & procedure) override;
+      // void _user_post(const ::procedure & procedure) override;
+      // void _main_send(const ::procedure & procedure) override;
+      // void _main_post(const ::procedure & procedure) override;
+
+         void send(const ::procedure & procedure) override;
+         void post(const ::procedure & procedure) override;
+         void main_send(const ::procedure & procedure) override;
+         void main_post(const ::procedure & procedure) override;
+
+         //void display_error_trap_push(int i) override;
+      //void display_error_trap_pop_ignored(int i) override;
+
+//   ::e_status x11_initialize() override;
+//   void * x11_get_display() override;
+//   void x11_sync(const ::procedure & procedure) override;
+//   void x11_async(const ::procedure & procedure) override;
+//   void x11_display_error_trap_push(int i) override;
+//   void x11_display_error_trap_pop_ignored(int i) override;
+
+      //void main_post(const ::procedure & procedure) override;
+
+         void _on_gtk_application_startup() override;
+      ::pointer < ::pixmap > get_pixmap_from_file(const ::block & block) override;
+         void each_window(const ::function < void(::acme::windowing::window*) > & function) override;
+
+   };
+
+      
+      } // namespace windowing
+
+
+   } // namespace acme
+
+
+} // namespace gtk3
+
+
+

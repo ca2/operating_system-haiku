@@ -25,7 +25,7 @@ if(EXISTS "${_sunos_ffmpeg_pkgconfig_dir}/libswresample.pc"
 endif()
 
 
-add_compile_definitions(__SUNOS__)
+add_compile_definitions(__HAIKU__)
 
 set(default_write_text write_text_pango)
 set(default_draw2d draw2d_cairo)
@@ -66,11 +66,11 @@ message(STATUS "__TARGET_SYSTEM_ARCHITECTURE is ${__TARGET_SYSTEM_ARCHITECTURE}"
 message(STATUS "\$ENV{__SYSTEM} is $ENV{__SYSTEM}")
 
 
-if (${__SYSTEM} STREQUAL "openindiana")
+if (${__SYSTEM} STREQUAL "haiku")
 
-   set(OPENINDIANA TRUE)
+   set(HAIKU TRUE)
 
-   set(SUNOS_LIKE TRUE)
+   set(HAIKU_LIKE TRUE)
 
    #add_compile_definitions(UBUNTU_LINUX)
 
@@ -108,6 +108,8 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/operating_system/storage-${OPERATIN
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/operating_system/storage-${OPERATING_SYSTEM_NAME}/third/library/${TARGET_ARCH}/basis)
 
 
+message("OPERATING_SYSTEM_NAME is ${OPERATING_SYSTEM_NAME}")
+message("CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 #include_directories(${WORKSPACE_FOLDER})
 #include_directories($ENV{HOME}/__config)
 #include_directories(${WORKSPACE_FOLDER}/source)
