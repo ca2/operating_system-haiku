@@ -57,6 +57,11 @@ if (NOT __SYSTEM)
    set(__SYSTEM "haiku")
 endif()
 
+if(NOT ${__TARGET_SYSTEM_ARCHITECTURE})
+set(__TARGET_SYSTEM_ARCHITECTURE ${__SYSTEM_ARCHITECTURE})
+endif()
+
+
 
 message(STATUS "__SYSTEM_ARCHITECTURE is ${__SYSTEM_ARCHITECTURE}")
 
@@ -66,8 +71,11 @@ set(__TARGET_SYSTEM_ARCHITECTURE ${__SYSTEM_ARCHITECTURE})
 message(STATUS "__TARGET_SYSTEM_ARCHITECTURE is ${__TARGET_SYSTEM_ARCHITECTURE}")
 
 
+if(NOT $ENV{__SYSTEM} OR $ENV{__SYSTEM}  STREQUAL "")
+message(STATUS "\$ENV{__SYSTEM} is (Empty)")
+else()
 message(STATUS "\$ENV{__SYSTEM} is $ENV{__SYSTEM}")
-
+endif()
 
 if ("${__SYSTEM}" STREQUAL "haiku")
 
@@ -79,7 +87,7 @@ if ("${__SYSTEM}" STREQUAL "haiku")
 
 #   add_compile_definitions(DEBIAN_LIKE_LIBUILD_GPU_BASED_APPLICATIONSNUX)
 
-   message(STATUS "UBUNTU has been set TRUE")
+   message(STATUS "HAIKU has been set TRUE")
 
    set(APPINDICATOR_PKG_MODULE "ayatana-appindicator3-0.1")
 
@@ -89,7 +97,14 @@ if ("${__SYSTEM}" STREQUAL "haiku")
 
    set(HAS_SYSTEM_UNAC FALSE)
 
-
+   if(NOT ${MAIN_STORE_SLASHED_OPERATING_SYSTEM} OR ${MAIN_STORE_SLASHED_OPERATING_SYSTEM}  STREQUAL "")
+	set(MAIN_STORE_SLASHED_OPERATING_SYSTEM "haiku")
+   endif()
+   
+   if(NOT ${TOOL_RELEASE_NAME} OR ${TOOL_RELEASE_NAME}  STREQUAL "")
+	set(TOOL_RELEASE_NAME "haiku")
+   endif()
+   
 endif()
 
 
