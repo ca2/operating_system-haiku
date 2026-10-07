@@ -7,6 +7,9 @@
 #include "path_system.h"
 #include "acme/operating_system/summary.h"
 #include "acme/filesystem/filesystem/file_context.h"
+#include <cstdlib>
+#include <cerrno>
+#include <climits>
 
 
 //::user::enum_desktop _get_edesktop();
@@ -912,7 +915,7 @@ namespace acme_haiku
 	
 	   psummary->m_strSystemFamily = "haiku";
 	
-	   psummary->m_strSystemFamilyName = "SunOS";
+	   psummary->m_strSystemFamilyName = "Haiku";
 	
 	
 	   //
@@ -1313,7 +1316,12 @@ namespace acme_haiku
 	   // -------------------------------------------------------------------
 	   //
 	
-	   if(this->has_posix_shell_command("pkg"))
+	   if(this->has_posix_shell_command("pkgman"))
+	   {
+	      psummary->m_strSudoInstall = "pkgman install";
+	      psummary->m_strStandardPackageFileExtension = "hpkg";
+	   }
+	   else if(this->has_posix_shell_command("pkg"))
 	   {
 	
 	      //
@@ -1402,7 +1410,7 @@ namespace acme_haiku
 	   if(strSystemArchitecture.case_insensitive_equals("i86pc"))
 	   {
 	
-	      psummary->m_strPackagePlatform = "amd64";
+	         psummary->m_strPackagePlatform = "x86_64";
 	
 	   }
 	   else if(
@@ -1410,7 +1418,7 @@ namespace acme_haiku
 	      || strSystemArchitecture.case_insensitive_equals("x86_64"))
 	   {
 	
-	      psummary->m_strPackagePlatform = "amd64";
+	      psummary->m_strPackagePlatform = "x86_64";
 	
 	   }
 	   else if(
@@ -1435,7 +1443,18 @@ namespace acme_haiku
 	   // -------------------------------------------------------------------
 	   //
 	
-	   if(psummary->m_strAmbient == "mate")
+	   if(psummary->m_strAmbient.is_empty())
+	   {
+	      psummary->m_strAmbient = "haiku";
+	      psummary->m_strAmbientName = "Haiku";
+	      psummary->m_strTerminal = "/boot/system/apps/Terminal";
+	      if (psummary->m_strSystemBranch.is_empty())
+	      {
+	         psummary->m_strSystemBranch = "haiku";
+	         psummary->m_strSystemBranchName = "Haiku";
+	      }
+	   }
+	   else if(psummary->m_strAmbient == "mate")
 	   {
 	
 	      psummary->m_strTerminal = "mate-terminal";
@@ -1493,7 +1512,22 @@ namespace acme_haiku
 	   // Combined system identifier
 	   // -------------------------------------------------------------------
 	   //
+	   
+	   if(psummary->m_strSystem.case_insensitive_equals("haiku")
+	   && psummary->m_strSystemBranch.case_insensitive_equals("haiku"))
+	   {
 	
+	   psummary->m_strSystemAmbientReleaseArchitecture =
+	      psummary->m_strSystem
+	      + "/"
+	      + psummary->m_strSystemRelease
+	      + "/"
+	      + psummary->m_strSystemArchitecture;
+	      
+	   }
+	   else
+	   {
+	   
 	   psummary->m_strSystemAmbientReleaseArchitecture =
 	      psummary->m_strSystem
 	      + "/"
@@ -1502,6 +1536,8 @@ namespace acme_haiku
 	      + psummary->m_strSystemRelease
 	      + "/"
 	      + psummary->m_strSystemArchitecture;
+	   
+	   }
 	
 	
 	   psummary->m_strSystemAmbientReleaseArchitecture.trim("/");
@@ -1519,21 +1555,40 @@ namespace acme_haiku
 	
 	   ::string_array_base straRelease;
 	
+	   // Haiku releases are R1~beta6, not plain decimal version numbers.
+	   // Keep the full release identifier above; parse only its numeric prefix.
+	   if (strRelease.begins("R"))
+	   {
+	      strRelease = strRelease.substr(1);
+	   }
+	   strRelease = strRelease.get_word("~");
 	   straRelease.explode(".", strRelease);
+
+	   auto numericReleasePart = [](const ::string & part) -> ::i32
+	   {
+	      if (part.is_empty()) return 0;
+	      for (::character_count i = 0; i < part.length(); ++i)
+	         if (part[i] < '0' || part[i] > '9') return 0;
+	      char * end = nullptr;
+	      errno = 0;
+	      const auto value = ::strtol(part.c_str(), &end, 10);
+	      return errno == 0 && end && *end == '\0' && value <= INT_MAX
+	         ? static_cast<::i32>(value) : 0;
+	   };
 	
 	
 	   if(straRelease.get_size() >= 1)
 	   {
 	
 	      psummary->m_iMajor =
-	         ::as_i32(straRelease[0]);
+	         numericReleasePart(straRelease[0]);
 	
 	
 	      if(straRelease.get_size() >= 2)
 	      {
 	
 	         psummary->m_iMinor =
-	            ::as_i32(straRelease[1]);
+	            numericReleasePart(straRelease[1]);
 	
 	      }
 	
