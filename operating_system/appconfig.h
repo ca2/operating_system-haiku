@@ -1,6 +1,6 @@
 #define default_node node_haiku
-#define default_windowing windowing_x11
-#define default_draw2d draw2d_cairo
+#define default_windowing windowing_haiku
+#define default_draw2d draw2d_haiku
 #define default_write_text write_text_pango
 #define default_imaging imaging_freeimage
 #define default_nano_compress nano_compress_command_line
@@ -8,3 +8,7 @@
 #define acme_node acme_haiku
 
 
+
+#define default_acme_windowing acme_windowing_haiku
+#define default_operating_ambient operating_ambient_haiku
+#define default_nano_graphics nano_graphics_cairo

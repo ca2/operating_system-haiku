@@ -1,68 +1,65 @@
 #include "native.h"
-#include <port.h>
+#include <Looper.h>
+#include <Message.h>
+#include <Messenger.h>
+#include <NodeMonitor.h>
+#include <OS.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <map>
+#include <mutex>
+#include <new>
 
-extern "C" int apex_haiku_fen_port()
-{
-   int port = port_create();
-   if (port >= 0 && fcntl(port, F_SETFD, FD_CLOEXEC) == -1)
-   {
-      int error = errno;
-      close(port); errno = error; return -1;
-   }
-   return port;
+namespace {
+class monitor : public BLooper {
+public:
+ sem_id changed;
+ monitor(sem_id s) : BLooper("ca2-node-monitor"), changed(s) {}
+ void MessageReceived(BMessage *m) override {
+  if(m->what!=B_NODE_MONITOR){BLooper::MessageReceived(m);return;}
+  int32 opcode=0;m->FindInt32("opcode",&opcode);
+  if(opcode==B_STAT_CHANGED){int32 fields=0;if(m->FindInt32("fields",&fields)==B_OK && (fields&~B_STAT_ACCESS_TIME)==0)return;}
+  release_sem(changed);
+ }
+};
+struct entry { node_ref ref{}; bool watching=false; };
+std::mutex registry_mutex;
+std::map<int,monitor *> monitors;
+monitor *lookup(int id){std::lock_guard<std::mutex> guard(registry_mutex);auto i=monitors.find(id);return i==monitors.end()?nullptr:i->second;}
+int error(status_t s){if(s==B_OK)return 0;if(s==B_ENTRY_NOT_FOUND)return ENOENT;if(s==B_NO_MEMORY)return ENOMEM;return EIO;}
 }
-extern "C" void apex_haiku_fen_close(int port) { if (port >= 0) close(port); }
-extern "C" int apex_haiku_fen_stat(const char *path, apex_haiku_fen_status *out)
-{
-   struct stat status;
-   out->exists = 0;
-   if (lstat(path, &status) == -1) return errno;
-   out->exists = 1;
-   out->device = status.st_dev; out->inode = status.st_ino; out->size = status.st_size;
-   out->atime_sec = status.st_atim.tv_sec; out->atime_nsec = status.st_atim.tv_nsec;
-   out->mtime_sec = status.st_mtim.tv_sec; out->mtime_nsec = status.st_mtim.tv_nsec;
-   out->ctime_sec = status.st_ctim.tv_sec; out->ctime_nsec = status.st_ctim.tv_nsec;
-   out->directory = S_ISDIR(status.st_mode); out->symlink = S_ISLNK(status.st_mode);
-   return 0;
+extern "C" int apex_haiku_fen_port(){
+ sem_id id=create_sem(0,"ca2-node-changed");if(id<0){errno=ENOMEM;return -1;}
+ auto *m=new(std::nothrow) monitor(id);if(!m){delete_sem(id);errno=ENOMEM;return -1;}
+ if(m->Run()<0){delete m;delete_sem(id);errno=EIO;return -1;}
+ {std::lock_guard<std::mutex> guard(registry_mutex);monitors[id]=m;}return id;
 }
-extern "C" void *apex_haiku_fen_entry(const char *path)
-{
-   file_obj_t *file = static_cast<file_obj_t *>(calloc(1, sizeof(file_obj_t)));
-   if (!file) return nullptr;
-   file->fo_name = strdup(path);
-   if (!file->fo_name) { free(file); return nullptr; }
-   return file;
+extern "C" void apex_haiku_fen_close(int id){
+ monitor *m=nullptr;{std::lock_guard<std::mutex> guard(registry_mutex);auto i=monitors.find(id);if(i!=monitors.end()){m=i->second;monitors.erase(i);}}
+ if(m){stop_watching(BMessenger(m));if(m->Lock())m->Quit();}if(id>=0)delete_sem(id);
 }
-extern "C" int apex_haiku_fen_arm(int port, void *entry, const apex_haiku_fen_status *status)
-{
-   file_obj_t *file = static_cast<file_obj_t *>(entry);
-   file->fo_atime.tv_sec = status->atime_sec; file->fo_atime.tv_nsec = status->atime_nsec;
-   file->fo_mtime.tv_sec = status->mtime_sec; file->fo_mtime.tv_nsec = status->mtime_nsec;
-   file->fo_ctime.tv_sec = status->ctime_sec; file->fo_ctime.tv_nsec = status->ctime_nsec;
-   int events = FILE_MODIFIED | FILE_ATTRIB | FILE_TRUNC;
-   if (status->symlink) events |= FILE_NOFOLLOW;
-   return port_associate(port, PORT_SOURCE_FILE, reinterpret_cast<uintptr_t>(file), events, nullptr) == -1 ? errno : 0;
+extern "C" int apex_haiku_fen_stat(const char *path,apex_haiku_fen_status *out){
+ struct stat s{};out->exists=0;if(lstat(path,&s)!=0)return errno;out->exists=1;
+ out->device=s.st_dev;out->inode=s.st_ino;out->size=s.st_size;
+ out->atime_sec=s.st_atim.tv_sec;out->atime_nsec=s.st_atim.tv_nsec;
+ out->mtime_sec=s.st_mtim.tv_sec;out->mtime_nsec=s.st_mtim.tv_nsec;
+ out->ctime_sec=s.st_ctim.tv_sec;out->ctime_nsec=s.st_ctim.tv_nsec;
+ out->directory=S_ISDIR(s.st_mode);out->symlink=S_ISLNK(s.st_mode);return 0;
 }
-extern "C" void apex_haiku_fen_remove(int port, void *entry)
-{
-   if (!entry) return;
-   file_obj_t *file = static_cast<file_obj_t *>(entry);
-   port_dissociate(port, PORT_SOURCE_FILE, reinterpret_cast<uintptr_t>(file));
-   free(file->fo_name); free(file);
+extern "C" void *apex_haiku_fen_entry(const char *){return new(std::nothrow) entry;}
+extern "C" int apex_haiku_fen_arm(int id,void *p,const apex_haiku_fen_status *s){
+ auto *e=static_cast<entry *>(p);auto *m=lookup(id);if(!e || !m)return EINVAL;
+ node_ref ref{};ref.device=s->device;ref.node=s->inode;
+ if(e->watching && e->ref.device==ref.device && e->ref.node==ref.node)return 0;
+ if(e->watching)watch_node(&e->ref,B_STOP_WATCHING,BMessenger(m));
+ uint32 flags=B_WATCH_NAME|B_WATCH_STAT|B_WATCH_INTERIM_STAT|B_WATCH_ATTR;if(s->directory)flags|=B_WATCH_DIRECTORY;
+ status_t result=watch_node(&ref,flags,BMessenger(m));e->watching=result==B_OK;e->ref=ref;return error(result);
 }
-extern "C" int apex_haiku_fen_next(int port, int timeout_ms)
-{
-   port_event_t event;
-   struct timespec timeout = {timeout_ms / 1000, (timeout_ms % 1000) * 1000000L};
-   if (port_get(port, &event, &timeout) == -1)
-      return errno == ETIME || errno == EINTR ? 0 : -errno;
-   // Do not dereference portev_object: an already-queued event can refer to
-   // an association removed by the directory reconciliation pass.
-   return 1;
+extern "C" void apex_haiku_fen_remove(int id,void *p){
+ auto *e=static_cast<entry *>(p);if(!e)return;auto *m=lookup(id);
+ if(e->watching && m)watch_node(&e->ref,B_STOP_WATCHING,BMessenger(m));delete e;
+}
+extern "C" int apex_haiku_fen_next(int id,int timeout_ms){
+ status_t result=acquire_sem_etc(id,1,B_RELATIVE_TIMEOUT,bigtime_t(timeout_ms)*1000);
+ if(result==B_OK)return 1;if(result==B_TIMED_OUT || result==B_WOULD_BLOCK || result==B_INTERRUPTED)return 0;return -EIO;
 }

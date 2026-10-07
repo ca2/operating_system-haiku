@@ -1,16 +1,7 @@
 #include "platform.h"
-#include "display.h"
-#include "window.h"
-#include "windowing.h"
-
-
-IMPLEMENT_FACTORY(acme_windowing_gtk3)
-{
-
-   pfactory->add_factory_item < ::gtk3::acme::windowing::display, ::acme::windowing::display >();
-   pfactory->add_factory_item < ::gtk3::acme::windowing::window, ::acme::windowing::window >();
-   pfactory->add_factory_item < ::gtk3::acme::windowing::windowing, ::acme::windowing::windowing >();
-
+#include "haiku_windowing.h"
+IMPLEMENT_FACTORY(acme_windowing_haiku){
+ pfactory->add_factory_item<::haiku::acme::windowing::windowing,::acme::windowing::windowing>();
+ pfactory->add_factory_item<::haiku::acme::windowing::window,::acme::windowing::window>();
+ pfactory->add_factory_item<::haiku::acme::windowing::display,::acme::windowing::display>();
 }
-
-
