@@ -25,6 +25,21 @@ void bitmap::create_bitmap(::draw2d::graphics *,const ::i32_size &size,::pixmap 
  memory_set(m_memoryDraw2dBitmap.data(),0,m_memoryDraw2dBitmap.size());
  if(pixels && pixels->m_pimage32Raw) check(haiku_draw_surface_write(m_surface,pixels->m_pimage32Raw,pixels->m_iScan));
 }
+void bitmap::set_size(const ::i32_size &size,bool preserve){
+ if(size==m_size && m_surface)return;::memory saved;auto old=m_size;
+ if(preserve && m_surface){read_pixels();saved=m_memoryDraw2dBitmap;}
+ create_bitmap(nullptr,size);
+ if(preserve && saved.size()>0)write_pixels(old,{},(const ::image32_t *)saved.data(),old.cx*4,true);
+}
+void bitmap::write_pixels(const ::i32_size &size,const ::i32_point &point,const ::image32_t *data,::i32 scan,bool topDown){
+ if(!data || scan<size.cx*4 || size.cx<=0 || size.cy<=0)throw ::exception(error_bad_argument);
+ ::memory copy;copy.set_size(scan*size.cy);memory_copy(copy.data(),data,copy.size());read_pixels();
+ for(int y=0;y<size.cy;y++){int dy=point.y+y;if(dy<0 || dy>=m_size.cy)continue;
+  int start=maximum(0,-point.x),end=minimum(size.cx,m_size.cx-point.x);if(end<=start)continue;
+  auto *src=copy.data()+(topDown?y:size.cy-1-y)*scan+start*4;
+  auto *dst=m_memoryDraw2dBitmap.data()+(dy*m_size.cx+point.x+start)*4;memory_copy(dst,src,(end-start)*4);
+ }commit_pixels();
+}
 void bitmap::read_pixels() { check(haiku_draw_surface_read(m_surface,m_memoryDraw2dBitmap.data(),m_size.cx*4)); }
 void bitmap::commit_pixels() { check(haiku_draw_surface_write(m_surface,m_memoryDraw2dBitmap.data(),m_size.cx*4)); }
 void *graphics::surface() {
@@ -78,6 +93,7 @@ void graphics::TextOutRaw(double x,double y,const ::scoped_string &text) {
  _tidy_map(r);b->read_pixels();auto p=create_newø<::pixmap>();
  p->m_memoryPixmap.reference_data(b->m_memoryDraw2dBitmap.data(),b->m_memoryDraw2dBitmap.size());
  p->m_pimage32Raw=(::image32_t *)b->m_memoryDraw2dBitmap.data();p->m_iScan=b->m_size.cx*4;p->m_bTopLeft=true;p->m_size=m_size;p->m_sizeRaw=b->m_size;
+ m_ppixmapOwned=p;
  p->pixmap_map(r.is_set()?r : ::i32_rectangle(m_point,m_size));return {this,p};
 }
 void image::_unmap(::image_pixmap_lease *lease) {
@@ -120,7 +136,7 @@ bool graphics::_set(const ::f64_arc &r){haiku_draw_shape_arc(m_shape,r.left,r.to
 void graphics::restore_graphics_context(::i32 state){check(haiku_draw_restore(surface(),state));}
 void graphics::_set(const ::geometry2d::matrix &m){check(haiku_draw_transform(surface(),m.a1,m.a2,m.b1,m.b2,m.c1,m.c2));}
 void graphics::intersect_clip(const ::f64_rectangle &r){check(haiku_draw_clip(surface(),r.left,r.top,r.right,r.bottom,0));}
-void graphics::reset_clip(){check(haiku_draw_clip(surface(),0,0,0,0,1));}
+void graphics::reset_clip(){if(m_pdraw2dbitmap)check(haiku_draw_clip(surface(),0,0,0,0,1));}
 void graphics::_draw_raw(const ::f64_rectangle &dst,::image::image *src,const ::image::image_drawing_options &options,const ::f64_point &pt){_stretch_raw(dst,src,options,::f64_rectangle(pt,dst.size()));}
 void graphics::_stretch_raw(const ::f64_rectangle &dst,::image::image *src,const ::image::image_drawing_options &options,const ::f64_rectangle &source){
  if(!src)throw ::exception(error_null_pointer);auto b=src->get_bitmap_as_source(this);auto *native=dynamic_cast<bitmap *>(b.m_p);
@@ -128,4 +144,18 @@ void graphics::_stretch_raw(const ::f64_rectangle &dst,::image::image *src,const
  check(haiku_draw_blit(surface(),native->m_surface,dst.left,dst.top,dst.right,dst.bottom,source.left,source.top,source.right,source.bottom,alpha_mode()==::draw2d::e_alpha_mode_blend,options.opacity().f64_opacity()));
 }
 
+}
+
+void draw2d_haiku::graphics::on_acquire_memory_graphics(bool external,::image::image *target,const ::i32_size &size,::draw2d::domain *domain){
+ if(target){auto b=target->get_bitmap_as_target(this);set(b);}
+ ::draw2d::graphics::on_acquire_memory_graphics(external,target,size,domain);
+}
+void draw2d_haiku::graphics::_create_memory_graphics(const ::i32_size &size,::draw2d::domain *domain){
+ set_draw2d_domain(domain);
+ constructø(m_pimageOwned);
+ m_pimageOwned->update_as_render_target(size,domain,this);
+ m_pimageOwned->m_pgraphicsOwned=this;
+ set(m_pimageOwned->m_pdraw2dbitmap);
+ m_pimageTarget=m_pimageOwned;
+ set_ok_flag();
 }

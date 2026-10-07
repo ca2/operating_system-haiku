@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.17)
+project(write_text_haiku CXX)
+add_library(${PROJECT_NAME} SHARED _factory.cpp native.cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_compile_options(${PROJECT_NAME} PRIVATE -fpermissive)
+target_link_libraries(${PROJECT_NAME} PRIVATE acme apex aqua aura be)
+target_link_options(${PROJECT_NAME} PRIVATE -Wl,-z,defs)

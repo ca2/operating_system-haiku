@@ -33,6 +33,12 @@ namespace acme_haiku
    }
 
 
+   ::string node::default_component_implementation(const ::scoped_string &name)
+   {
+      if (name == "nano_http" || name == "nano_compress") return "command_line";
+      return ::acme_posix::node::default_component_implementation(name);
+   }
+
    void node::initialize(::particle * pparticle)
    {
 

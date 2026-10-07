@@ -69,7 +69,8 @@ extern "C" void *haiku_window_create(void *owner,void (*event)(void *,const haik
  {std::lock_guard<std::mutex> guard(registry_mutex);s->id=next_id++;windows[s->id]=s;}
  s->window=new window(s,title,x,y,w,h);return s;
 }
-extern "C" void haiku_window_destroy(void *p){auto *s=static_cast<state *>(p);if(!s)return;{std::lock_guard<std::mutex> guard(registry_mutex);windows.erase(s->id);}if(s->window->Lock())s->window->Quit();delete s;}
+extern "C" void haiku_window_destroy(void *p){auto *s=static_cast<state *>(p);if(!s)return;{std::lock_guard<std::mutex> guard(registry_mutex);windows.erase(s->id);}if(s->window->Lock())s->window->Quit();delete s;
+ bool empty;{std::lock_guard<std::mutex> guard(registry_mutex);empty=windows.empty();}if(empty)haiku_app_quit();}
 extern "C" void haiku_window_show(void *p,int show){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){if(show){if(s->window->IsHidden())s->window->Show();}else{if(!s->window->IsHidden())s->window->Hide();}s->window->Unlock();}}
 extern "C" void haiku_window_title(void *p,const char *title){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->SetTitle(title);s->window->Unlock();}}
 extern "C" void haiku_window_frame(void *p,int x,int y,int w,int h){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->MoveTo(x,y);s->window->ResizeTo(w-1,h-1);s->window->Unlock();}}
@@ -82,3 +83,4 @@ extern "C" void haiku_window_present(void *p,const void *data,int w,int h,int st
  if(s->window->Lock()){auto *v=static_cast<window *>(s->window)->client;v->bitmap=std::move(bitmap);v->Invalidate();s->window->Unlock();}
 }
 extern "C" void haiku_screen_bounds(int *x,int *y,int *w,int *h){BScreen screen;auto f=screen.Frame();*x=int(f.left);*y=int(f.top);*w=f.IntegerWidth()+1;*h=f.IntegerHeight()+1;}
+extern "C" void haiku_mouse_position(int *x,int *y){*x=0;*y=0;state *s=nullptr;{std::lock_guard<std::mutex> guard(registry_mutex);if(!windows.empty())s=windows.begin()->second;}if(s && s->window->Lock()){auto *v=s->window->ChildAt(0);BPoint p;uint32 buttons;v->GetMouse(&p,&buttons,false);v->ConvertToScreen(&p);*x=int(p.x);*y=int(p.y);s->window->Unlock();}}

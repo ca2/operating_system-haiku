@@ -50,7 +50,7 @@ elseif(${__HAIKU__})
    pkg_check_modules(PKGCONFIG x11)
    target_compile_options(${PROJECT_NAME} PRIVATE ${PKGCONFIG_CFLAGS})
    target_link_options(${PROJECT_NAME} PRIVATE ${PKGCONFIG_LDFLAGS})
-   target_link_libraries(${PROJECT_NAME} PRIVATE dl pthread ${library_references})
+   target_link_libraries(${PROJECT_NAME} PRIVATE pthread ${library_references})
    target_link_options(${PROJECT_NAME} PRIVATE -Wl,-z,defs)
 
 

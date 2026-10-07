@@ -9,10 +9,13 @@
 namespace windowing_haiku {
 void window::_create_window(){
  auto *ui=user_interaction();if(ui)m_rectangle={ui->const_layout().sketch().origin(),ui->const_layout().sketch().size()};
+ if(m_rectangle.is_empty())m_rectangle={100,100,740,580};
+ m_pointWindow=m_rectangle.origin();m_sizeWindow=m_rectangle.size();
  ::haiku::acme::windowing::window::_create_window();
  if(ui)ui->send_message(::user::e_message_create,0,0);
  create_graphics_thread();
 }
+void window::native_event(const haiku_window_event &e){if(e.kind==1)m_sizeWindow={e.width,e.height};else if(e.kind==2)m_pointWindow={e.x,e.y};::haiku::acme::windowing::window::native_event(e);}
 void window::destroy_window(){::haiku::acme::windowing::window::destroy_window();::windowing::window::on_destroy();}
 void window::main_send(const ::procedure &p){system()->acme_windowing()->main_send(p);}
 void window::main_post(const ::procedure &p){system()->acme_windowing()->main_post(p);}

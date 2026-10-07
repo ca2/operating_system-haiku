@@ -3,6 +3,7 @@
 set(OPERATING_SYSTEM_NAME "haiku")
 set(__HAIKU__ TRUE)
 set(USE_PKGCONFIG TRUE)
+list(APPEND global_library_references network)
 set(INCLUDE_DRAW2D_CAIRO TRUE)
 
 
@@ -27,13 +28,12 @@ endif()
 
 add_compile_definitions(__HAIKU__)
 
-set(default_write_text write_text_pango)
+set(default_write_text write_text_haiku)
 set(default_draw2d draw2d_haiku)
 set(default_node node_haiku)
 set(default_acme_windowing acme_windowing_haiku)
 set(default_windowing windowing_haiku)
-set(default_operating_ambient operating_ambient_haiku)
-list(APPEND app_common_dependencies operating_ambient_haiku windowing_haiku acme_windowing_haiku)
+list(APPEND app_common_dependencies operating_ambient_haiku windowing_haiku acme_windowing_haiku nano_http_command_line nano_compress_command_line nano_graphics_cairo)
 set(default_imaging imaging_freeimage)
 set(default_networking networking_bsd)
 set(default_audio audio_sunaudio CACHE STRING "SunOS audio backend")

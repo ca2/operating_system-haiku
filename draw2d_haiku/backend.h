@@ -16,6 +16,8 @@ public:
  void create_bitmap(::draw2d::graphics *, const ::i32_size &, ::pixmap *) override;
  ::i32 stride_for_width(::i32 w) override { return w*4; }
  ::i32_size size() const override { return m_size; }
+ void set_size(const ::i32_size &,bool preserve=false) override;
+ void write_pixels(const ::i32_size &,const ::i32_point &,const ::image32_t *,::i32,bool) override;
  void read_pixels();
  void commit_pixels();
 };
@@ -26,6 +28,8 @@ public:
  using ::draw2d::graphics::draw_ellipse;
  using ::draw2d::graphics::fill_ellipse;
  void *surface();
+ void on_acquire_memory_graphics(bool,::image::image *,const ::i32_size &,::draw2d::domain *) override;
+ void _create_memory_graphics(const ::i32_size &,::draw2d::domain *) override;
  ::i32 save_graphics_context() override;
  void restore_graphics_context(::i32) override;
  void _set(const ::geometry2d::matrix &) override;

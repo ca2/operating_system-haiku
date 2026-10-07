@@ -4,7 +4,8 @@
 //#include "acme/library.h"
 
 
-char * get_current_dir_name();
+#include <unistd.h>
+#include <limits.h>
 
 
 namespace acme_haiku
@@ -14,9 +15,9 @@ namespace acme_haiku
    ::u32 get_current_directory(string& str)
    {
 
-      auto psz = ::get_current_dir_name();
-
-      str = ::string_from_strdup(psz);
+      char path[PATH_MAX];
+      if (!::getcwd(path, sizeof(path))) throw ::exception(error_failed, "Cannot get current directory");
+      str = path;
 
       return str.length();
 

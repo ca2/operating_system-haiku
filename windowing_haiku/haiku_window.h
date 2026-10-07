@@ -8,6 +8,7 @@ namespace windowing_haiku {
 class window : virtual public ::windowing::window, virtual public ::haiku::acme::windowing::window {
 public:
  void _create_window() override;
+ void native_event(const haiku_window_event &) override;
  void destroy_window() override;
  void main_send(const ::procedure &) override;
  void main_post(const ::procedure &) override;
@@ -34,6 +35,7 @@ class display : virtual public ::windowing::display,virtual public ::haiku::acme
 public:
  void open_display() override {}
  bool is_display_opened() const override {return true;}
+ ::i32_point _get_mouse_cursor_position() override {int x=0,y=0;haiku_mouse_position(&x,&y);return {x,y};}
  void _enumerate_monitors() override {::haiku::acme::windowing::display::_enumerate_monitors();}
  ::i32_size get_main_screen_size() override {return ::haiku::acme::windowing::display::get_main_screen_size();}
 };

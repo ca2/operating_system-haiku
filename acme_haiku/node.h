@@ -33,6 +33,8 @@ namespace acme_haiku
 
       ~node() override;
 
+      ::string default_component_implementation(const ::scoped_string &) override;
+
 
       void initialize(::particle * pparticle) override;
 
