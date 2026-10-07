@@ -1,0 +1,38 @@
+// Created by camilo on 2024-12-30 19:48 <3ThomasBorregaardSorensen!!
+#pragma once
+
+
+#include "aura/graphics/write_text/internal_font.h"
+
+
+namespace draw2d_haiku
+{
+
+
+
+   class internal_font :
+      virtual public ::write_text::internal_font
+   {
+   public:
+
+
+      auto_pointer < Gdiplus::PrivateFontCollection >       m_pgdiplusprivatefontcollection;
+      ::raw_array_base < Gdiplus::FontFamily >              m_gdiplusfamilya;
+      ::i32                                                 m_iFamilyCount;
+
+      
+      internal_font();
+      ~internal_font() override;
+
+      
+      void load_from_memory(::memory_base * pmemory) override;
+      void on_create_font(::draw2d::graphics * pdraw2dgraphics, ::write_text::font * pwritetextfont) override;
+
+
+   };
+
+
+} // namespace draw2d_haiku
+
+
+

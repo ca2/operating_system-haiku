@@ -1,0 +1,48 @@
+#pragma once
+
+
+#include "aura/graphics/draw2d/draw2d.h"
+
+
+namespace draw2d_haiku
+{
+
+
+   class CLASS_DECL_DRAW2D_HAIKU draw2d :
+      virtual public ::draw2d::draw2d
+   {
+   public:
+
+
+
+      //__creatable_from_base(draw2d, ::draw2d::draw2d);
+      
+
+      draw2d();
+      ~draw2d() override;
+
+
+      void initialize(::particle * pparticle) override;
+
+      virtual string write_text_get_default_implementation_name() override;
+
+      bool graphics_context_does_full_redraw() override;
+
+
+      //virtual ::write_text::internal_font * internal_font_from_file(::platform::context * pcontext, const ::file::path & path);
+      void adjust_composited_window_styles(::u32& nExStyle, ::u32& nStyle) override;
+
+      protected:
+            
+      ::draw2d::graphics_pointer do_allocation_strategy(::draw2d::domain* pdraw2ddomain, ::image::image *pimage,
+                                                                 const ::i32_size &size) override;
+
+      void do_release_to_pool_strategy(::draw2d::graphics_pointer &pdraw2dgraphics, ::image::image * pimage) override;
+
+   };
+
+
+} // namespace draw2d_haiku
+
+
+
