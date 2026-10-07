@@ -46,13 +46,6 @@ void *graphics::surface() {
  auto *b=dynamic_cast<bitmap *>(m_pdraw2dbitmap.m_p);
  if(!b || !b->m_surface) throw ::exception(error_wrong_state,"No Haiku drawing surface");return b->m_surface;
 }
-void graphics::set(::draw2d::bitmap *b) { if(!dynamic_cast<bitmap *>(b))throw ::exception(error_wrong_state);m_pdraw2dbitmap=b; }
-void graphics::create_bitmap_graphics(::draw2d::bitmap *b,::draw2d::domain *d) {set_draw2d_domain(d);set(b);}
-void graphics::line(double a,double b,double c,double d) {line(a,b,c,d,m_pdraw2dpen);}
-void graphics::line(double a,double b,double c,double d,::draw2d::pen *p) {
- if(!p || p->m_epen==::draw2d::e_pen_null)return;
- check(haiku_draw_line(surface(),a,b,c,d,argb(p->m_color),p->m_dWidth,alpha_mode()==::draw2d::e_alpha_mode_blend));
-}
 void graphics::fill_rectangle(const ::f64_rectangle &r) {fill_rectangle(r,m_pdraw2dbrush);}
 void graphics::fill_rectangle(const ::f64_rectangle &r,::draw2d::brush *b) {
  if(!b || b->m_ebrush==::draw2d::e_brush_null)return;
