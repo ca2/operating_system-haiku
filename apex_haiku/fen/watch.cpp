@@ -44,7 +44,7 @@ namespace apex_haiku::fen
          {
             try { if (!file_watch_step()) break; }
             catch (const ::exception &e)
-            { warning() << "SunOS file-event watcher stopped: " << e.get_message(); break; }
+            { warning() << "Haiku file-event watcher stopped: " << e.get_message(); break; }
          }
       });
    }
@@ -84,7 +84,7 @@ namespace apex_haiku::fen
    {
       int event = apex_haiku_fen_next(m_port, 100);
       if (!::task_get_run()) return false;
-      if (event < 0) throw ::exception(error_failed, "SunOS event port error " + ::as_string(-event));
+      if (event < 0) throw ::exception(error_failed, "Haiku event port error " + ::as_string(-event));
       if (!event) return true;
       for (int i = 0; i < 255 && apex_haiku_fen_next(m_port, 0) > 0; ++i) {}
       reconcile(false);
@@ -148,7 +148,7 @@ namespace apex_haiku::fen
          item->m_status = status;
          int error = apex_haiku_fen_arm(m_port, item->m_native, &status);
          if (error == ENOENT) continue; // Concurrent delete/rename: parent event retries.
-         if (error) throw ::exception(error_failed, "Cannot associate SunOS file event: "
+         if (error) throw ::exception(error_failed, "Cannot associate Haiku file event: "
             + path + " (errno " + ::as_string(error) + ")");
          current[path] = item;
       }

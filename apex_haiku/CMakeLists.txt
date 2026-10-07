@@ -30,6 +30,7 @@ list(APPEND library_source
 set_source_files_properties(fen/native.cpp PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 add_executable(haiku_fen_native_test EXCLUDE_FROM_ALL fen/native_test.cpp fen/native.cpp)
 target_compile_features(haiku_fen_native_test PRIVATE cxx_std_20)
+target_link_libraries(haiku_fen_native_test PRIVATE be)
 
 
 if(USE_KQUEUE_FILE_WATCHER_DIRECTLY)
@@ -74,7 +75,9 @@ if (MSVC)
     target_link_libraries(${PROJECT_NAME} PRIVATE acme apex aqua aura Gdiplus)
 elseif(${__HAIKU__})
     #pkg_check_modules(PKGCONFIG glib-2.0 gtk+-3.0 gdk-3.0 appindicator-0.1)
-    pkg_check_modules(PKGCONFIG glib-2.0 freetype2 gtk+-3.0 gdk-3.0)
+    # Native Haiku services use libbe, not GTK.
+    list(APPEND library_references be)
+    list(APPEND static_library_references be)
     target_compile_options(${PROJECT_NAME} PRIVATE -fpermissive)
     target_compile_options(static_${PROJECT_NAME} PRIVATE -fpermissive)
     target_compile_definitions(static_${PROJECT_NAME} PRIVATE CUBE)

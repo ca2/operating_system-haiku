@@ -28,7 +28,12 @@ endif()
 add_compile_definitions(__HAIKU__)
 
 set(default_write_text write_text_pango)
-set(default_draw2d draw2d_cairo)
+set(default_draw2d draw2d_haiku)
+set(default_node node_haiku)
+set(default_acme_windowing acme_windowing_haiku)
+set(default_windowing windowing_haiku)
+set(default_operating_ambient operating_ambient_haiku)
+list(APPEND app_common_dependencies operating_ambient_haiku windowing_haiku acme_windowing_haiku)
 set(default_imaging imaging_freeimage)
 set(default_networking networking_bsd)
 set(default_audio audio_sunaudio CACHE STRING "SunOS audio backend")
@@ -108,8 +113,8 @@ if ("${__SYSTEM}" STREQUAL "haiku")
 endif()
 
 
-include("operating_system/operating_system-posix/_desktop_ambient_1.cmake")
-include("operating_system/operating_system-posix/_desktop_ambient_2.cmake")
+# Haiku uses app_server and the Interface Kit rather than an XDG desktop.
+set(DESKTOP_ENVIRONMENT_NAME "haiku")
 
 #set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/time-${OPERATING_SYSTEM_NAME}/x64/basis)
 set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/output")
