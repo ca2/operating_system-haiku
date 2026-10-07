@@ -1653,8 +1653,8 @@ namespace acme_haiku
 	   straPath.explode(":", strPath);
 	
 	
-	   if(pathToolBinArchFolder.has_character()
-	      && !straPath.contains(pathToolBinArchFolder))
+	   if(pathToolBinArchFolder.has_character())
+	      //&& !straPath.contains(pathToolBinArchFolder))
 	   {
 	
 	      straPrefixPaths.add(pathToolBinArchFolder);
@@ -1662,8 +1662,8 @@ namespace acme_haiku
 	   }
 	
 	
-	   if(pathToolFolderBin.has_character()
-	      && !straPath.contains(pathToolFolderBin))
+	   if(pathToolFolderBin.has_character())
+	      //&& !straPath.contains(pathToolFolderBin))
 	   {
 	
 	      straPrefixPaths.add(pathToolFolderBin);
@@ -1671,8 +1671,8 @@ namespace acme_haiku
 	   }
 	
 	
-	   if(pathToolPosixBinFolder.has_character()
-	      && !straPath.contains(pathToolPosixBinFolder))
+	   if(pathToolPosixBinFolder.has_character())
+	      //&& !straPath.contains(pathToolPosixBinFolder))
 	   {
 	
 	      straPrefixPaths.add(pathToolPosixBinFolder);
@@ -1680,8 +1680,8 @@ namespace acme_haiku
 	   }
 	
 	
-	   if(pathHomeCodeOperatingSystemBin.has_character()
-	      && !straPath.contains(pathHomeCodeOperatingSystemBin))
+	   if(pathHomeCodeOperatingSystemBin.has_character())
+	      //&& !straPath.contains(pathHomeCodeOperatingSystemBin))
 	   {
 	
 	      straPrefixPaths.add(pathHomeCodeOperatingSystemBin);
