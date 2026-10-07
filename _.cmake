@@ -52,7 +52,10 @@ execute_process(COMMAND uname -r OUTPUT_VARIABLE __SYSTEM_RELEASE)
 set(OPERATING_SYSTEM_RELEASE ${__SYSTEM_RELEASE})
 
 
-set(__SYSTEM $ENV{__SYSTEM})
+set(__SYSTEM "$ENV{__SYSTEM}")
+if (NOT __SYSTEM)
+   set(__SYSTEM "haiku")
+endif()
 
 
 message(STATUS "__SYSTEM_ARCHITECTURE is ${__SYSTEM_ARCHITECTURE}")
@@ -66,7 +69,7 @@ message(STATUS "__TARGET_SYSTEM_ARCHITECTURE is ${__TARGET_SYSTEM_ARCHITECTURE}"
 message(STATUS "\$ENV{__SYSTEM} is $ENV{__SYSTEM}")
 
 
-if (${__SYSTEM} STREQUAL "haiku")
+if ("${__SYSTEM}" STREQUAL "haiku")
 
    set(HAIKU TRUE)
 
