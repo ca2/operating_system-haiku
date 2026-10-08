@@ -151,6 +151,24 @@ namespace windowing_haiku
    }
 
 
+   void window::draw_frame()
+   {
+      if (auto *ui = user_interaction())
+      {
+         auto edisplay = ui->const_layout().sketch().display();
+         bool visible = ::is_screen_visible(edisplay);
+         if (visible != m_nativeVisible)
+         {
+            haiku_window_show(m_native, visible ? 1 : 0);
+            m_nativeVisible = visible;
+         }
+         ui->set_display(edisplay, ::user::e_layout_window);
+         if (!visible)
+            return;
+      }
+      ::windowing::window::draw_frame();
+   }
+
    void window::window_update_screen()
    {
       if (!m_pgraphicsgraphics)

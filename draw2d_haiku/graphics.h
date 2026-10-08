@@ -62,7 +62,9 @@ namespace draw2d_haiku
 		void _draw_raw(const ::f64_rectangle &,::image::image *,const ::image::image_drawing_options &,const ::f64_point &) override;
 		void _stretch_raw(const ::f64_rectangle &,::image::image *,const ::image::image_drawing_options &,const ::f64_rectangle &) override;
 		void draw(::draw2d::path *) override;
+		void draw(::draw2d::path *, ::draw2d::pen *) override;
 		void fill(::draw2d::path *) override;
+		void fill(::draw2d::path *, ::draw2d::brush *) override;
 		bool _set(const ::draw2d::enum_item &) override;
 		bool _set(const ::f64_line &) override;
 		bool _set(const ::f64_lines &) override;
@@ -72,7 +74,8 @@ namespace draw2d_haiku
 		bool _set(const ::f64_polygon_base &) override;
 		void prepare_path(::draw2d::path *);
 		void move_shape(double,double);
-		void arc_shape(double,double,double,double,double,double);
+		void _arc_shape(double l, double t, double r, double b, double start, double exten);
+	   void arc(::f64 x, ::f64 y, ::f64 w, ::f64 h, ::f64_angle start, ::f64_angle extends) override;
 		void _paint_shape(::draw2d::brush *pdraw2dbrush,::draw2d::pen *pdraw2dpen,bool alternate);
 		void set(::draw2d::bitmap *) override;
 		void create_bitmap_graphics(::draw2d::bitmap *,::draw2d::domain *) override;

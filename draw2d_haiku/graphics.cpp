@@ -2,6 +2,8 @@
 #include "platform.h"
 #include "aura/graphics/image/image.h"
 #include "graphics.h"
+#include "../../../source/app/aura/graphics/draw2d/graphics.h"
+
 #include "bitmap.h"
 #include "font.h"
 #include "acme/prototype/geometry2d/matrix.h"
@@ -218,6 +220,7 @@ namespace draw2d_haiku
 
       _001ColorSelect(color);
 
+      static int traceCount=0;if(traceCount++<8){fprintf(stderr,"RECT %g,%g,%g,%g scale=%g origin=%g,%g\n",rectangle.left,rectangle.top,rectangle.right,rectangle.bottom,double(lock.m_pbitmap->m_pbview->Scale()),double(lock.m_pbitmap->m_pbview->Origin().x),double(lock.m_pbitmap->m_pbview->Origin().y));auto view=lock.m_pbitmap->m_pbview;double tx=0,ty=0;view->Transform().GetTranslation(&tx,&ty);auto bb=lock.m_pbitmap->m_pbbitmap->Bounds();auto vb=view->Bounds();fprintf(stderr,"DRAW bitmap=%p transform=%g,%g nativeBitmap=%g,%g,%g,%g nativeView=%g,%g,%g,%g\n",static_cast<::draw2d::bitmap *>(lock.m_pbitmap),tx,ty,double(bb.left),double(bb.top),double(bb.right),double(bb.bottom),double(vb.left),double(vb.top),double(vb.right),double(vb.bottom));}
       lock.m_pbitmap->m_pbview->FillRect(as_brect(rectangle));
    }
 
@@ -264,7 +267,7 @@ namespace draw2d_haiku
 
          m_bBeginFigure = true;
 
-         arc_shape(rectangle.left, rectangle.top, rectangle.right, rectangle.bottom, 0, 2 * MATH_PI);
+         _arc_shape(rectangle.left, rectangle.top, rectangle.right, rectangle.bottom, 0, 2 * MATH_PI);
 
          m_bshape.Close();
 
@@ -275,30 +278,34 @@ namespace draw2d_haiku
 
       graphics_lock lock(target_bitmap());
 
+      ::draw2d::save_context savecontext(this);
+
       _001ColorSelect(pbrush->m_color);
 
       auto pbview = lock.m_pbitmap->m_pbview;
 
-      auto transform = pbview->Transform();
+      //auto transform = pbview->Transform();
 
       auto rect = as_brect(rectangle);
 
-      BPoint corners[2] = {rect.LeftTop(), rect.RightBottom()};
+      //BPoint corners[2] = {rect.LeftTop(), rect.RightBottom()};
 
-      transform.Apply(corners, 2);
+      //transform.Apply(corners, 2);
 
-      pbview->SetTransform(BAffineTransform());
+      //pbview->SetTransform(BAffineTransform());
 
-      pbview->FillEllipse(BRect(corners[0], corners[1]));
+      //pbview->FillEllipse(BRect(corners[0], corners[1]));
 
-      pbview->SetTransform(transform);
+      pbview->FillEllipse(rect);
 
-      auto tr = lock.m_pbitmap->m_pbview->Transform();
+      //pbview->SetTransform(transform);
 
-      double tx = 0, ty = 0;
-      tr.
+      //auto tr = lock.m_pbitmap->m_pbview->Transform();
 
-         GetTranslation(&tx, &ty);
+      //double tx = 0, ty = 0;
+      //tr.
+
+        // GetTranslation(&tx, &ty);
    }
 
 
@@ -322,36 +329,39 @@ namespace draw2d_haiku
 
       _001ColorSelect(pdraw2dpen->m_color);
 
+      //::draw2d::save_context savecontext(this);
+
       auto pbview = lock.m_pbitmap->m_pbview;
 
-      auto transform = pbview->Transform();
+      //auto transform = pbview->Transform();
 
       auto rect = as_brect(rectangle);
 
-      BPoint corners[2] = {rect.LeftTop(), rect.RightBottom()};
+      //BPoint corners[2] = {rect.LeftTop(), rect.RightBottom()};
 
-      transform.Apply(corners, 2);
+      //transform.Apply(corners, 2);
 
-      pbview->SetTransform(BAffineTransform());
+      //pbview->SetTransform(BAffineTransform());
 
       pbview->SetPenSize(pdraw2dpen->m_dWidth);
 
-      pbview->StrokeEllipse(BRect(corners[0], corners[1]));
+      //pbview->StrokeEllipse(BRect(corners[0], corners[1]));
+      pbview->StrokeEllipse(rect);
 
-      pbview->SetTransform(transform);
+      //pbview->SetTransform(transform);
 
-      pbview->Sync();
+      //pbview->Sync();
 
-      double tx = 0, ty = 0;
+      //double tx = 0, ty = 0;
 
-      pbview->Transform().GetTranslation(&tx, &ty);
+//      pbview->Transform().GetTranslation(&tx, &ty);
 
-      int xx = int(tx + 12), yy = int(ty);
+  //    int xx = int(tx + 12), yy = int(ty);
 
-      if (xx >= 0 && yy >= 0 && xx < lock.m_pbitmap->m_size.cx && yy < lock.m_pbitmap->m_size.cy)
-      {
-         auto *bits = static_cast<unsigned char *>(lock.m_pbitmap->m_pbbitmap->Bits());
-      }
+    //  if (xx >= 0 && yy >= 0 && xx < lock.m_pbitmap->m_size.cx && yy < lock.m_pbitmap->m_size.cy)
+      //{
+        // auto *bits = static_cast<unsigned char *>(lock.m_pbitmap->m_pbbitmap->Bits());
+     // }
    }
 
 
@@ -386,6 +396,7 @@ namespace draw2d_haiku
 
       pbview->SetFont(&f);
 
+      static int traceText=0;if(traceText++<6)fprintf(stderr,"TEXT text=%s point=%g,%g target=%g,%g matrix=%g,%g bitmap=%p\n",s.c_str(),x,y,m_pointTarget.x,m_pointTarget.y,m_matrix.c1,m_matrix.c2,m_pdraw2dbitmap.m_p);
       pbview->DrawString(s.c_str(), s.size(), BPoint(x, y + h.ascent));
    }
 
@@ -456,7 +467,10 @@ namespace draw2d_haiku
 
       graphics_lock lock(target_bitmap());
       update_matrix();
-      auto view = lock.m_pbitmap->m_pbview;
+      static int traceShape=0;if(traceShape++<5){auto bounds=m_bshape.Bounds();fprintf(stderr,"SHAPE bounds=%g,%g,%g,%g target=%g,%g matrix=%g,%g\n",double(bounds.left),double(bounds.top),double(bounds.right),double(bounds.bottom),m_pointTarget.x,m_pointTarget.y,m_matrix.c1,m_matrix.c2);}
+        auto view = lock.m_pbitmap->m_pbview;
+      // Native shapes are relative to the pen; CA2 paths use absolute coordinates.
+      view->MovePenTo(BPoint(0, 0));
       view->SetFillRule(alternate ? B_EVEN_ODD : B_NONZERO);
       if (ppen)
          view->SetPenSize(ppen->m_dWidth);
@@ -492,13 +506,57 @@ namespace draw2d_haiku
          else
             view->StrokeShape(&m_bshape, gradient);
       }
+      else if (brush->m_ebrush == ::draw2d::e_brush_box_gradient && pbrush)
+      {
+         auto bounds = m_bshape.Bounds();
+         int left = int(std::floor(bounds.left)), top = int(std::floor(bounds.top));
+         int width = int(std::ceil(bounds.right)) - left + 1;
+         int height = int(std::ceil(bounds.bottom)) - top + 1;
+         if (width <= 0 || height <= 0)
+            return;
+         BBitmap pixels(BRect(0, 0, width - 1, height - 1), B_RGBA32);
+         if (pixels.InitCheck() != B_OK)
+            throw ::exception(error_failed);
+         double halfWidth = brush->m_size.cx / 2, halfHeight = brush->m_size.cy / 2;
+         double radius = std::fmax(0., std::fmin(brush->m_dRadius, std::fmin(halfWidth, halfHeight)));
+         double cx = brush->m_point.x + halfWidth, cy = brush->m_point.y + halfHeight;
+         auto inner = as_rgb_color(brush->m_color1), outer = as_rgb_color(brush->m_color2);
+         for (int y = 0; y < height; ++y)
+            for (int x = 0; x < width; ++x)
+            {
+               double dx = std::fabs(left + x + .5 - cx) - (halfWidth - radius);
+               double dy = std::fabs(top + y + .5 - cy) - (halfHeight - radius);
+               double distance = std::hypot(std::fmax(dx, 0.), std::fmax(dy, 0.))
+                  + std::fmin(std::fmax(dx, dy), 0.) - radius;
+               double t = std::fmax(0., std::fmin(1., 1. + distance / std::fmax(radius, 1.)));
+               double a = inner.alpha * (1. - t), b = outer.alpha * t, alpha = a + b;
+               auto *pixel = static_cast<unsigned char *>(pixels.Bits()) + y * pixels.BytesPerRow() + x * 4;
+               pixel[0] = alpha > 0 ? (inner.blue * a + outer.blue * b) / alpha : 0;
+               pixel[1] = alpha > 0 ? (inner.green * a + outer.green * b) / alpha : 0;
+               pixel[2] = alpha > 0 ? (inner.red * a + outer.red * b) / alpha : 0;
+               pixel[3] = alpha;
+            }
+         auto transform = view->Transform();
+         view->SetTransform(BAffineTransform());
+         view->PushState();
+         view->SetTransform(transform);
+         view->ClipToShape(&m_bshape);
+         view->DrawBitmap(&pixels, BPoint(left, top));
+         view->PopState();
+         view->SetTransform(transform);
+      }
       else
          throw ::interface_only("Haiku brush type pending");
    }
 
    void graphics::fill(::draw2d::path *pdraw2dpath)
    {
-      if (!m_pdraw2dbrush || m_pdraw2dbrush->m_ebrush == ::draw2d::e_brush_null)
+      fill(pdraw2dpath, m_pdraw2dbrush);
+   }
+
+   void graphics::fill(::draw2d::path *pdraw2dpath, ::draw2d::brush *pdraw2dbrush)
+   {
+      if (!pdraw2dbrush || pdraw2dbrush->m_ebrush == ::draw2d::e_brush_null)
       {
          return;
       }
@@ -512,13 +570,17 @@ namespace draw2d_haiku
 
       prepare_path(pdraw2dpath);
 
-      _paint_shape(m_pdraw2dbrush, nullptr, pdraw2dpath->m_efillmode == ::draw2d::e_fill_mode_alternate);
+      _paint_shape(pdraw2dbrush, nullptr, pdraw2dpath->m_efillmode == ::draw2d::e_fill_mode_alternate);
    }
 
 
    void graphics::draw(::draw2d::path *pdraw2dpath)
    {
-      auto pdraw2dpen = m_pdraw2dpen.m_p;
+      draw(pdraw2dpath, m_pdraw2dpen);
+   }
+
+   void graphics::draw(::draw2d::path *pdraw2dpath, ::draw2d::pen *pdraw2dpen)
+   {
 
       if (!pdraw2dpen || pdraw2dpen->m_epen == ::draw2d::e_pen_null)
          return;
@@ -541,6 +603,7 @@ namespace draw2d_haiku
          graphics_lock lock(target_bitmap());
          _001ColorSelect(pdraw2dpen->m_color);
          auto pbview = lock.m_pbitmap->m_pbview;
+         pbview->MovePenTo(BPoint(0, 0));
          pbview->SetPenSize(pdraw2dpen->m_dWidth);
          pbview->StrokeShape(&m_bshape);
       }
@@ -549,12 +612,25 @@ namespace draw2d_haiku
    void graphics::move_shape(double x, double y)
    {
       BPoint p(x, y);
-      if (m_bBeginFigure || m_bshape.CurrentPosition() != p)
+      if (m_bBeginFigure)
          m_bshape.MoveTo(p);
+      else if (m_bshape.CurrentPosition() != p)
+         m_bshape.LineTo(p);
       m_bBeginFigure = false;
    }
 
-   void graphics::arc_shape(double l, double t, double r, double b, double start, double extent)
+
+   void graphics::arc(::f64 x, ::f64 y, ::f64 w, ::f64 h, ::f64_angle start, ::f64_angle extends)
+   {
+      if (!m_pdraw2dpen || m_pdraw2dpen->m_epen == ::draw2d::e_pen_null)
+         return;
+      m_bshape.Clear();
+      m_bBeginFigure = true;
+      _arc_shape(x, y, x + w, y + h, start.radian(), extends.radian());
+      _paint_shape(nullptr, m_pdraw2dpen, false);
+   }
+
+   void graphics::_arc_shape(double l, double t, double r, double b, double start, double extent)
    {
       double cx = (l + r) / 2, cy = (t + b) / 2, rx = (r - l) / 2, ry = (b - t) / 2;
       int steps = int(std::ceil(std::fabs(extent) / (MATH_PI / 2)));
@@ -638,7 +714,7 @@ namespace draw2d_haiku
    bool graphics::_set(const ::f64_ellipse &ellipse)
    {
       m_bBeginFigure = true;
-      arc_shape(ellipse.left, ellipse.top, ellipse.right, ellipse.bottom, 0, 2 * MATH_PI);
+      _arc_shape(ellipse.left, ellipse.top, ellipse.right, ellipse.bottom, 0, 2 * MATH_PI);
       m_bshape.Close();
       m_bBeginFigure = true;
       return true;
@@ -646,45 +722,68 @@ namespace draw2d_haiku
 
    bool graphics::_set(const ::f64_arc &arc)
    {
-      arc_shape(arc.left, arc.top, arc.right, arc.bottom, arc.m_angleBeg.radian(), arc.m_angleExt.radian());
+      _arc_shape(arc.left, arc.top, arc.right, arc.bottom, arc.m_angleBeg.radian(), arc.m_angleExt.radian());
       return true;
    }
+
 
    ::i32 graphics::save_graphics_context()
    {
       graphics_lock lock(target_bitmap());
-      lock.m_pbitmap->m_pbview->PushState();
+      auto * pbitmap = lock.m_pbitmap;
+      auto transform = pbitmap->m_pbview->Transform();
+      pbitmap->m_btransforma.add(transform);
+      BRegion region;
+      pbitmap->m_pbview->GetClippingRegion(&region);
+      pbitmap->m_bregionaClip.add(region);
+      // Haiku composes transforms with parent states; CA2 matrices are absolute.
+      pbitmap->m_pbview->SetTransform(BAffineTransform());
+      pbitmap->m_pbview->ConstrainClippingRegion(nullptr);
+      pbitmap->m_pbview->PushState();
+      pbitmap->m_pbview->SetTransform(transform);
+      pbitmap->m_pbview->ConstrainClippingRegion(&region);
       return ++lock.m_pbitmap->m_iSavedState;
    }
+
 
    void graphics::restore_graphics_context(::i32 state)
    {
       graphics_lock lock(target_bitmap());
-      auto *b = lock.m_pbitmap;
-      if (state < 1 || state > b->m_iSavedState)
+      auto *pbitmap = lock.m_pbitmap;
+      if (state < 1 || state > pbitmap->m_iSavedState)
          throw ::exception(error_bad_argument);
-      while (b->m_iSavedState >= state)
+      while (pbitmap->m_iSavedState >= state)
       {
-         b->m_pbview->PopState();
-         --b->m_iSavedState;
+         pbitmap->m_pbview->PopState();
+         pbitmap->m_pbview->SetTransform(pbitmap->m_btransforma.pop());
+         pbitmap->m_pbview->ConstrainClippingRegion(&pbitmap->m_bregionaClip.last());
+         pbitmap->m_bregionaClip.erase_last();
+         --pbitmap->m_iSavedState;
       }
    }
 
+
    void graphics::_set(const ::geometry2d::matrix &matrix)
    {
+
       if (!m_pdraw2dbitmap)
+      {
+
          return;
 
+      }
 
       if (m_bTargetRectangleModified)
       {
-         defer_on_target_rectangle_update();
-      }
 
+         defer_on_target_rectangle_update();
+
+      }
 
       graphics_lock lock(target_bitmap());
 
       lock.m_pbitmap->m_pbview->SetTransform(BAffineTransform(matrix.a1, matrix.a2, matrix.b1, matrix.b2, matrix.c1, matrix.c2));
+
    }
 
 
@@ -711,8 +810,8 @@ namespace draw2d_haiku
          rect.right = std::fmax(rect.right, pts[i].x);
          rect.bottom = std::fmax(rect.bottom, pts[i].y);
       }
-      pbview->SetTransform(BAffineTransform()); /* clip diagnostic */
-      pbview->SetTransform(tr);
+      //pbview->SetTransform(BAffineTransform()); /* clip diagnostic */
+      //pbview->SetTransform(tr);
    }
 
    void graphics::reset_clip()
@@ -758,6 +857,7 @@ namespace draw2d_haiku
       }
       graphics_lock lock(target_bitmap());
       _001ColorSelect(::argb(255, 255, 255, 255));
+      static int traceBlit=0;if(traceBlit++<5)fprintf(stderr,"BLIT dst=%g,%g,%g,%g target=%g,%g matrix=%g,%g\n",rectangleTarget.left,rectangleTarget.top,rectangleTarget.right,rectangleTarget.bottom,m_pointTarget.x,m_pointTarget.y,m_matrix.c1,m_matrix.c2);
       lock.m_pbitmap->m_pbview->DrawBitmap(&copy, as_brect(rectangleSource), as_brect(rectangleTarget), B_FILTER_BITMAP_BILINEAR);
    }
 

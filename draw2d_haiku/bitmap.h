@@ -6,7 +6,10 @@
 #include "operating_system-haiku/draw2d_haiku/object.h"
 
 #include <Bitmap.h>
+#include <Region.h>
 #include <View.h>
+#include <AffineTransform.h>
+
 
 
 namespace draw2d_haiku
@@ -21,6 +24,8 @@ namespace draw2d_haiku
       BBitmap *m_pbbitmap = nullptr;
       BView *m_pbview = nullptr; // Owned by BBitmap.
       int m_iSavedState = 0;
+      ::array<BAffineTransform> m_btransforma;
+      ::array<BRegion> m_bregionaClip;
       bitmap();
 
       ~bitmap() override;

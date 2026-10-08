@@ -21,6 +21,8 @@ namespace draw2d_haiku
       m_pbbitmap = nullptr;
       m_pbview = nullptr;
       m_iSavedState = 0;
+      m_btransforma.clear();
+      m_bregionaClip.clear();
       ::draw2d::bitmap::destroy();
    }
 

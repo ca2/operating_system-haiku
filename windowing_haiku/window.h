@@ -36,6 +36,7 @@ namespace windowing_haiku
       bool is_window_visible() override { return m_nativeVisible; }
       bool _is_window_visible_unlocked() override { return m_nativeVisible; }
       void window_update_screen() override;
+      void draw_frame() override;
       //void present_buffer_item(::graphics::buffer_item *);
       bool _strict_set_window_position_unlocked(::i32, ::i32, ::i32, ::i32, bool, bool) override;
 
