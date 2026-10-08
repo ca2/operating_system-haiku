@@ -1,3 +1,4 @@
+// Created by camilo on 2026-10-07 22:40 <3ThomasBorregaardSørensen!! Mummi!! bilbo!!
 #include "platform.h"
 #include "aura/graphics/image/image.h"
 #include "graphics.h"
@@ -25,41 +26,193 @@ namespace draw2d_haiku
 {
 
 
-static rgb_color as_rgb_color(const ::color::color &c){return {c.u8_red(),c.u8_green(),c.u8_blue(),c.u8_opacity()};}
-static BRect as_brect(const ::f64_rectangle &r){return BRect(r.left,r.top,r.right-1,r.bottom-1);}
-bitmap *graphics::target_bitmap(){
- defer_on_target_rectangle_update();
- auto *b=dynamic_cast<bitmap *>(m_pdraw2dbitmap.m_p);
- if(!b || !b->m_pbbitmap)throw ::exception(error_wrong_state,"No Haiku drawing bitmap");
- return b;
-}
-void graphics::_001ColorSelect(const ::color::color &c,bool blend){
- update_matrix();
- auto *v=target_bitmap()->m_pbview;v->SetHighColor(as_rgb_color(c));
- v->SetDrawingMode(blend?B_OP_ALPHA:B_OP_COPY);
- v->SetBlendingMode(B_PIXEL_ALPHA,B_ALPHA_COMPOSITE);
-}
-void graphics::set(::draw2d::bitmap *b){
- if(!dynamic_cast<bitmap *>(b))throw ::exception(error_wrong_state);
- m_pdraw2dbitmap=b;
-}
-void graphics::create_bitmap_graphics(::draw2d::bitmap *b,::draw2d::domain *d){set_draw2d_domain(d);set(b);}
-void graphics::on_acquire_memory_graphics(bool external,::image::image *target,const ::i32_size &size,::draw2d::domain *domain){
- m_pointBitmapOrigin=target?::f64_point(target->m_point) : ::f64_point();
- if(target){auto b=target->get_bitmap_as_target(this);set(b);}
- ::draw2d::graphics::on_acquire_memory_graphics(external,target,size,domain);
-}
-void graphics::_create_memory_graphics(const ::i32_size &size,::draw2d::domain *domain){
- set_draw2d_domain(domain);constructø(m_pimageOwned);
- m_pimageOwned->update_as_render_target(size,domain,this);m_pimageOwned->m_pgraphicsOwned=this;
- set(m_pimageOwned->m_pdraw2dbitmap);m_pimageTarget=m_pimageOwned;set_ok_flag();
-}
-void graphics::line(double a,double b,double c,double d){line(a,b,c,d,m_pdraw2dpen);}
-void graphics::line(double a,double b,double c,double d,::draw2d::pen *p){
- if(!p || p->m_epen==::draw2d::e_pen_null)return;
- graphics_lock lock(target_bitmap());_001ColorSelect(p->m_color,alpha_mode()==::draw2d::e_alpha_mode_blend);
- auto *v=lock.m_pbitmap->m_pbview;v->SetPenSize(p->m_dWidth);v->StrokeLine(BPoint(a,b),BPoint(c,d));
-}
+	rgb_color as_rgb_color(const ::color::color &c)
+	{
+	
+		return {c.u8_red(),c.u8_green(),c.u8_blue(),c.u8_opacity()};
+		
+	}
+
+	
+	BRect as_brect(const ::f64_rectangle &r)
+	{
+	
+		return BRect(r.left,r.top,r.right-1,r.bottom-1);
+		
+	}
+	
+	
+	
+	bitmap *graphics::target_bitmap()
+	{
+ 
+		defer_on_target_rectangle_update();
+ 
+		::cast < bitmap > pbitmap = m_pdraw2dbitmap;
+ 
+		if(!pbitmap || !pbitmap->m_pbbitmap)
+		{
+		
+		throw ::exception(error_wrong_state,"No Haiku drawing bitmap");
+			
+		}
+ 
+		return pbitmap;
+	
+	}
+
+
+   void graphics::set_alpha_mode(::draw2d::enum_alpha_mode ealphamode)
+   {
+
+      try
+      {
+
+         auto pbview = target_bitmap()->m_pbview;
+
+         if (::is_null(pbview))
+         {
+
+            throw ::exception(error_null_pointer);
+
+         }
+
+         if (ealphamode == ::draw2d::e_alpha_mode_blend)
+         {
+		 
+            pbview->SetDrawingMode(B_OP_ALPHA);
+
+         }
+         else if (ealphamode == ::draw2d::e_alpha_mode_set)
+         {
+
+      		pbview->SetDrawingMode(B_OP_COPY);
+
+         }
+
+         ::draw2d::graphics::set_alpha_mode(ealphamode);
+
+      }
+      catch (...)
+      {
+
+
+      }
+
+   }
+
+
+   void graphics::_001ColorSelect(const ::color::color &color)
+	{
+ 
+		auto * pbview = target_bitmap()->m_pbview;
+		
+		pbview->SetHighColor(as_rgb_color(color));
+ 
+		v->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_COMPOSITE);
+		
+	}
+   
+	
+   void graphics::set(::draw2d::bitmap * pbitmap)
+   {
+   
+      ::cast < bitmap > pdraw2dhaikubitmap = pbitmap;
+ 
+      if(!pdraw2dhaikubitmap)
+      {
+       
+         throw ::exception(error_wrong_state);
+         
+      }
+      
+      m_pdraw2dbitmap = pbitmap;
+
+   }
+   
+   
+   void graphics::create_bitmap_graphics(::draw2d::bitmap * pbitmap,::draw2d::domain *pdraw2ddomain)
+   {
+   
+      set_draw2d_domain(pdraw2ddomain);
+      
+      set(pbitmap);
+      
+   }
+   
+   
+   void graphics::on_acquire_memory_graphics(
+      bool external,
+      ::image::image *ptarget,
+      const ::i32_size &size,
+      ::draw2d::domain *domain)
+   {
+      
+      //m_pointBitmapOrigin=target?::f64_point(target->m_point) : ::f64_point();
+ 
+      if(ptarget)
+      {
+      
+         auto pbitmap = ptarget->get_bitmap_as_target(this);
+         
+         set(pbitmap);
+         
+      }
+      
+      ::draw2d::graphics::on_acquire_memory_graphics(external,target,size,domain);
+      
+   }
+   
+   
+   void graphics::_create_memory_graphics(const ::i32_size &size,::draw2d::domain *domain)
+   {
+ 
+      set_draw2d_domain(domain);
+      
+      constructø(m_pimageOwned);
+ 
+      m_pimageOwned->update_as_render_target(size,domain,this);
+      
+      m_pimageOwned->m_pgraphicsOwned=this;
+      
+      set(m_pimageOwned->m_pdraw2dbitmap);
+      
+      m_pimageTarget=m_pimageOwned;
+      
+      set_ok_flag();
+   
+   }
+
+
+   void graphics::line(double a,double b,double c,double d)
+   {
+   
+      line(a,b,c,d,m_pdraw2dpen);
+      
+   }
+
+
+   void graphics::line(double a,double b,double c,double d,::draw2d::pen *p)
+   {
+ 
+      if(!p || p->m_epen==::draw2d::e_pen_null)
+      {
+      
+         return;
+         
+      }
+ 
+      graphics_lock lock(target_bitmap());
+      
+      _001ColorSelect(p->m_color);
+ 
+      auto *v=lock.m_pbitmap->m_pbview;
+      v->SetPenSize(p->m_dWidth);
+      v->StrokeLine(BPoint(a,b),BPoint(c,d));
+      
+   }
+   
+   
 void graphics::fill_rectangle(const ::f64_rectangle &r){fill_rectangle(r,m_pdraw2dbrush);}
 void graphics::fill_rectangle(const ::f64_rectangle &r,::draw2d::brush *b){
  if(!b || b->m_ebrush==::draw2d::e_brush_null)return;
