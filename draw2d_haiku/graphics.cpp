@@ -19,7 +19,12 @@
 #include <GradientLinear.h>
 #include <GradientRadial.h>
 #include <cmath>
-namespace draw2d_haiku {
+
+
+namespace draw2d_haiku 
+{
+
+
 static rgb_color as_rgb_color(const ::color::color &c){return {c.u8_red(),c.u8_green(),c.u8_blue(),c.u8_opacity()};}
 static BRect as_brect(const ::f64_rectangle &r){return BRect(r.left,r.top,r.right-1,r.bottom-1);}
 bitmap *graphics::target_bitmap(){
@@ -65,7 +70,14 @@ void graphics::fill_rectangle(const ::f64_rectangle &r,::draw2d::brush *b){
 
 void graphics::fill_rectangle(const ::f64_rectangle &r,const ::color::color &c)
 {
-	
+
+	if (m_bTargetRectangleModified)
+	{
+
+		defer_on_target_rectangle_update();
+
+	}
+
 	graphics_lock lock(target_bitmap());
 	
 	_001ColorSelect(c,alpha_mode()==::draw2d::e_alpha_mode_blend);
