@@ -11,7 +11,12 @@
 #include "draw2d.h"
 #include "aura/graphics/draw2d/domain.h"
 #include "aura/graphics/draw2d/window_attachment.h"
-IMPLEMENT_FACTORY(draw2d_haiku){
+
+
+IMPLEMENT_FACTORY(draw2d_haiku)
+{
+
+
  pfactory->add_factory_item<::draw2d_haiku::image,::image::image>();
  pfactory->add_factory_item<::draw2d_haiku::graphics,::draw2d::graphics>();
  pfactory->add_factory_item<::draw2d_haiku::bitmap,::draw2d::bitmap>();
@@ -24,4 +29,6 @@ IMPLEMENT_FACTORY(draw2d_haiku){
  pfactory->add_factory_item<::draw2d_haiku::draw2d,::draw2d::draw2d>();
  pfactory->add_factory_item<::draw2d::domain,::acme::draw2d::domain>();
  pfactory->add_factory_item<::draw2d::window_attachment>();
+
+
 }

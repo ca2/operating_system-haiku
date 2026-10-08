@@ -1,5 +1,6 @@
 #include "platform.h"
 #include "windowing.h"
+#include "acme_windowing_haiku/window.h"
 namespace windowing_haiku {
 void windowing::initialize_windowing(){::haiku::acme::windowing::windowing::initialize_windowing();}
 void windowing::run(){::haiku::acme::windowing::windowing::run();}

@@ -1,35 +1,24 @@
+// Created by camilo on 2026-10-08 02:23 <3ThomasBorregaardSørensen!! Mummi!! bilbo!!
 #pragma once
+#include "aura/_.h"
 
 
-#include "windowing_posix/_.h"
-#include "acme_windowing_gtk3/_.h"
-//#include "nano_user_wayland/_.h"
 
-
-#if defined(_windowing_gtk3_project)
-   #define CLASS_DECL_WINDOWING_GTK3  CLASS_DECL_EXPORT
+#if defined(_windowing_haiku_project)
+#define CLASS_DECL_WINDOWING_HAIKU CLASS_DECL_EXPORT
 #else
-   #define CLASS_DECL_WINDOWING_GTK3  CLASS_DECL_IMPORT
+#define CLASS_DECL_WINDOWING_HAIKU CLASS_DECL_IMPORT
 #endif
 
 
-namespace windowing_gtk3
+namespace windowing_haiku
 {
-
 
    class windowing;
    class display;
+   class monitor;
    class window;
-   class x11data;
+   class graphics;
 
 
-   using WINDOW = long;
-
-
-} // namespace node_gnome
-
-
-//#include "nano_user_wayland/_.h"
-
-
-
+}

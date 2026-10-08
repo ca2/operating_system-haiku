@@ -12,6 +12,9 @@ public:
  void destroy_window() override;
  void set_window_text(const ::scoped_string &) override;
  ::i32_rectangle get_window_rectangle() override;
+ ::i32_rectangle window_get_client_rect() override;
+ ::i32_rectangle get_window_rect() override;
+ ::i32_rectangle get_window_rectangle_unlocked() override;
  void set_position(const ::i32_point &) override;
  void set_size(const ::i32_size &) override;
  void set_active_window() override;

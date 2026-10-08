@@ -14,17 +14,18 @@ namespace draw2d_haiku
 
 	class bitmap;
 
-	class graphics : virtual public ::draw2d::graphics
+	class CLASS_DECL_DRAW2D_HAIKU graphics :
+      virtual public ::draw2d::graphics
 	{
 	public:
 
-		 using ::draw2d::graphics::set;
-		 using ::draw2d::graphics::line;
-		 using ::draw2d::graphics::draw_ellipse;
-		 using ::draw2d::graphics::fill_ellipse;
-		 using ::draw2d::graphics::_set;
-		 using ::draw2d::graphics::draw;
-		 using ::draw2d::graphics::fill;
+      using ::draw2d::graphics::set;
+      using ::draw2d::graphics::line;
+      using ::draw2d::graphics::draw_ellipse;
+      using ::draw2d::graphics::fill_ellipse;
+      using ::draw2d::graphics::_set;
+      using ::draw2d::graphics::draw;
+      using ::draw2d::graphics::fill;
 		 
  
 		BShape m_bshape;
@@ -33,7 +34,11 @@ namespace draw2d_haiku
  
 		//::f64_point m_pointBitmapOrigin;
 		bool m_bBuildingClip=false;
-		
+
+
+	   graphics();
+	   ~graphics();
+
 		
 		void _add_shape(const ::f64_rectangle &) override;
 		void _add_shape(const ::f64_ellipse &) override;
@@ -41,7 +46,11 @@ namespace draw2d_haiku
 		void _intersect_clip() override;
  
 		bitmap *target_bitmap();
-		void _001ColorSelect(const ::color::color & color);
+		void set_alpha_mode(::draw2d::enum_alpha_mode) override;
+
+
+	   void _001ColorSelect(const ::color::color & color);
+
  
 		void on_acquire_memory_graphics(bool,::image::image *,const ::i32_size &,::draw2d::domain *) override;
 		void _create_memory_graphics(const ::i32_size &,::draw2d::domain *) override;
@@ -64,7 +73,7 @@ namespace draw2d_haiku
 		void prepare_path(::draw2d::path *);
 		void move_shape(double,double);
 		void arc_shape(double,double,double,double,double,double);
-		void paint_shape(bool,const ::draw2d::brush *,double,bool);
+		void _paint_shape(::draw2d::brush *pdraw2dbrush,::draw2d::pen *pdraw2dpen,bool alternate);
 		void set(::draw2d::bitmap *) override;
 		void create_bitmap_graphics(::draw2d::bitmap *,::draw2d::domain *) override;
 		void line(double,double,double,double) override;
@@ -79,7 +88,12 @@ namespace draw2d_haiku
 		void TextOutRaw(double,double,const ::scoped_string &) override;
 		::f64_size get_text_extent(const ::scoped_string &) override;
 		::f64_size _get_text_extent(const ::scoped_string &) override;
-		
+
+
 	};
-	
+
+
 }  // namespace draw2d_haiku
+
+
+

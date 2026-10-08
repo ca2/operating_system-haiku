@@ -18,3 +18,9 @@ void window::set_active_window(){haiku_window_activate(m_native);}
 ::operating_system::window window::operating_system_window() const{return ::operating_system::window(::operating_system::window_opaque_t((::u64)m_native,0,0),const_cast<window *>(this));}
 
 }
+
+namespace haiku::acme::windowing {
+::i32_rectangle window::window_get_client_rect(){auto r=get_window_rectangle();return {0,0,r.width(),r.height()};}
+::i32_rectangle window::get_window_rect(){return get_window_rectangle();}
+::i32_rectangle window::get_window_rectangle_unlocked(){return get_window_rectangle();}
+}
