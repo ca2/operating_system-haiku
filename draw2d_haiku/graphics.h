@@ -12,14 +12,19 @@ public:
  using ::draw2d::graphics::_set;
  using ::draw2d::graphics::draw;
  using ::draw2d::graphics::fill;
+ 
+ 
  BShape m_bshape;
- ::f64_point m_pointBitmapOrigin;
+ bool m_bBeginFigure=true;
+ 
+ 
+ //::f64_point m_pointBitmapOrigin;
  bool m_bBuildingClip=false;
  void _add_shape(const ::f64_rectangle &) override;
  void _add_shape(const ::f64_ellipse &) override;
  void _add_shape(const ::f64_polygon_base &) override;
  void _intersect_clip() override;
- bool m_bBeginFigure=true;
+ 
  bitmap *target_bitmap();
  void _001ColorSelect(const ::color::color &,bool);
  void on_acquire_memory_graphics(bool,::image::image *,const ::i32_size &,::draw2d::domain *) override;

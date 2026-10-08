@@ -61,24 +61,85 @@ void graphics::fill_rectangle(const ::f64_rectangle &r,::draw2d::brush *b){
  if(b->m_ebrush==::draw2d::e_brush_solid){fill_rectangle(r,b->m_color);return;}
  m_bshape.Clear();m_bBeginFigure=true;_set(r);paint_shape(true,b,1,false);
 }
-void graphics::fill_rectangle(const ::f64_rectangle &r,const ::color::color &c){
- graphics_lock lock(target_bitmap());_001ColorSelect(c,alpha_mode()==::draw2d::e_alpha_mode_blend);
- lock.m_pbitmap->m_pbview->FillRect(as_brect(r));
+
+
+void graphics::fill_rectangle(const ::f64_rectangle &r,const ::color::color &c)
+{
+	
+	graphics_lock lock(target_bitmap());
+	
+	_001ColorSelect(c,alpha_mode()==::draw2d::e_alpha_mode_blend);
+	
+	lock.m_pbitmap->m_pbview->FillRect(as_brect(r));
+	
 }
+
+
 void graphics::draw_rectangle(const ::f64_rectangle &r){draw_rectangle(r,m_pdraw2dpen);}
 void graphics::draw_rectangle(const ::f64_rectangle &r,::draw2d::pen *p){
  if(!p || p->m_epen==::draw2d::e_pen_null)return;
  graphics_lock lock(target_bitmap());_001ColorSelect(p->m_color,alpha_mode()==::draw2d::e_alpha_mode_blend);
  lock.m_pbitmap->m_pbview->SetPenSize(p->m_dWidth);lock.m_pbitmap->m_pbview->StrokeRect(as_brect(r));
 }
-void graphics::fill_ellipse(const ::f64_rectangle &r){
- fprintf(stderr,"ELLIPSE target=%g,%g origin=%g,%g rect=%g,%g,%g,%g\n",m_pointTarget.x,m_pointTarget.y,m_pointBitmapOrigin.x,m_pointBitmapOrigin.y,r.left,r.top,r.right,r.bottom);
- auto *b=m_pdraw2dbrush.m_p;if(!b || b->m_ebrush==::draw2d::e_brush_null)return;
- if(b->m_ebrush!=::draw2d::e_brush_solid){m_bshape.Clear();m_bBeginFigure=true;arc_shape(r.left,r.top,r.right,r.bottom,0,2*MATH_PI);m_bshape.Close();paint_shape(true,b,1,false);return;}
- graphics_lock lock(target_bitmap());_001ColorSelect(b->m_color,alpha_mode()==::draw2d::e_alpha_mode_blend);
- auto *view=lock.m_pbitmap->m_pbview;auto transform=view->Transform();auto rect=as_brect(r);BPoint corners[2]={rect.LeftTop(),rect.RightBottom()};transform.Apply(corners,2);view->SetTransform(BAffineTransform());view->FillEllipse(BRect(corners[0],corners[1]));view->SetTransform(transform);
- auto tr=lock.m_pbitmap->m_pbview->Transform();double tx=0,ty=0;tr.GetTranslation(&tx,&ty);fprintf(stderr,"NATIVE ellipse transform=%g,%g color=%d,%d,%d,%d\n",tx,ty,b->m_color.u8_red(),b->m_color.u8_green(),b->m_color.u8_blue(),b->m_color.u8_opacity());
-}
+
+	void graphics::fill_ellipse(const ::f64_rectangle &r)
+	{
+ 
+		fprintf(stderr,
+			"ELLIPSE target=%g,%g origin=%g,%g rect=%g,%g,%g,%g\n",
+			m_pointTarget.x,m_pointTarget.y,m_pointBitmapOrigin.x,m_pointBitmapOrigin.y,r.left,r.top,r.right,r.bottom);
+		
+		auto *pbrush=m_pdraw2dbrush.m_p;
+		
+		if(!pbrush || pbrush->m_ebrush==::draw2d::e_brush_null)
+			return;
+ 
+		if(pbrush->m_ebrush!=::draw2d::e_brush_solid)
+		{
+			
+			m_bshape.Clear();
+			
+			m_bBeginFigure=true;
+			
+			arc_shape(r.left,r.top,r.right,r.bottom,0,2*MATH_PI);
+			
+			m_bshape.Close();
+			
+			paint_shape(true,pbrush,1,false);
+			
+			return;
+			
+		}
+ 
+		graphics_lock lock(target_bitmap());
+		
+		_001ColorSelect(b->m_color,alpha_mode()==::draw2d::e_alpha_mode_blend);
+ 
+		auto *view=lock.m_pbitmap->m_pbview;
+		
+		auto transform=view->Transform();
+		
+		auto rect=as_brect(r);
+		
+		BPoint corners[2]={rect.LeftTop(),rect.RightBottom()};
+		
+		transform.Apply(corners,2);
+		
+		view->SetTransform(BAffineTransform());
+		
+		view->FillEllipse(BRect(corners[0],corners[1]));
+		
+		view->SetTransform(transform);
+ 
+		auto tr=lock.m_pbitmap->m_pbview->Transform();
+		
+		double tx=0,ty=0;tr.
+		
+		GetTranslation(&tx,&ty);
+		
+		fprintf(stderr,"NATIVE ellipse transform=%g,%g color=%d,%d,%d,%d\n",tx,ty,b->m_color.u8_red(),b->m_color.u8_green(),b->m_color.u8_blue(),b->m_color.u8_opacity());
+
+	}
 void graphics::draw_ellipse(const ::f64_rectangle &r){
  if(m_pdraw2dpen)fprintf(stderr,"PEN ellipse kind=%d width=%g rgba=%d,%d,%d,%d\n",int(m_pdraw2dpen->m_epen),m_pdraw2dpen->m_dWidth,m_pdraw2dpen->m_color.u8_red(),m_pdraw2dpen->m_color.u8_green(),m_pdraw2dpen->m_color.u8_blue(),m_pdraw2dpen->m_color.u8_opacity());
  auto *p=m_pdraw2dpen.m_p;if(!p || p->m_epen==::draw2d::e_pen_null)return;
@@ -158,9 +219,20 @@ void graphics::restore_graphics_context(::i32 state){
  if(state<1 || state>b->m_iSavedState)throw ::exception(error_bad_argument);
  while(b->m_iSavedState>=state){b->m_pbview->PopState();--b->m_iSavedState;}
 }
-void graphics::_set(const ::geometry2d::matrix &m){
- if(!m_pdraw2dbitmap)return;graphics_lock lock(target_bitmap());lock.m_pbitmap->m_pbview->SetTransform(BAffineTransform(m.a1,m.a2,m.b1,m.b2,m.c1-m_pointBitmapOrigin.x,m.c2-m_pointBitmapOrigin.y));
+
+void graphics::_set(const ::geometry2d::matrix &m)
+{
+
+   if(!m_pdraw2dbitmap)
+      return;
+ 
+   graphics_lock lock(target_bitmap());
+ 
+   lock.m_pbitmap->m_pbview->SetTransform(BAffineTransform(m.a1,m.a2,m.b1,m.b2,m.c1.x,m.c2);
+ 
 }
+
+
 void graphics::intersect_clip(const ::f64_rectangle &r){graphics_lock lock(target_bitmap());auto *v=lock.m_pbitmap->m_pbview;auto tr=v->Transform();auto rect=as_brect(r);BPoint pts[4]={rect.LeftTop(),rect.RightTop(),rect.RightBottom(),rect.LeftBottom()};tr.Apply(pts,4);rect=BRect(pts[0],pts[0]);for(int i=1;i<4;i++){rect.left=std::fmin(rect.left,pts[i].x);rect.top=std::fmin(rect.top,pts[i].y);rect.right=std::fmax(rect.right,pts[i].x);rect.bottom=std::fmax(rect.bottom,pts[i].y);}v->SetTransform(BAffineTransform());/* clip diagnostic */v->SetTransform(tr);}
 void graphics::reset_clip(){if(!m_pdraw2dbitmap)return;graphics_lock lock(target_bitmap());lock.m_pbitmap->m_pbview->ConstrainClippingRegion(nullptr);}
 void graphics::_draw_raw(const ::f64_rectangle &dst,::image::image *src,const ::image::image_drawing_options &o,const ::f64_point &p){_stretch_raw(dst,src,o,::f64_rectangle(p,dst.size()));}
