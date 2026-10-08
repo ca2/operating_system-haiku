@@ -1,52 +1,5 @@
 #pragma once
-
-
 #include "aura/graphics/draw2d/pen.h"
-#include "object.h"
-
-
-namespace draw2d_haiku
-{
-
-
-   class CLASS_DECL_DRAW2D_HAIKU pen :
-      virtual public ::draw2d_haiku::object,
-      virtual public ::draw2d::pen
-   {
-   public:
-
-
-      //__creatable_from_base(pen, ::draw2d::pen);
-
-
-      //Gdiplus::PenAlignment               m_egdiplusalign;
-
-      ::auto_pointer < ::Gdiplus::Pen >   m_pgdipluspen;
-
-      pen();
-      ~pen() override;
-
-
-//#ifdef DEBUG
-//
-//      void dump(dump_context & dumpcontext) const override;
-//
-//#endif
-
-      /*virtual void construct(::i32 nPenStyle, ::f64 nWidth, ::color::color crColor);
-      virtual void construct(::i32 nPenStyle, ::f64 nWidth, const LOGBRUSH* pLogBrush, ::i32 nStyleCount = 0, const DWORD* pStyle = nullptr);
-
-      bool CreatePen(::i32 nPenStyle, ::f64 nWidth, ::color::color crColor);
-      bool CreatePen(::i32 nPenStyle, ::f64 nWidth, const LOGBRUSH* pLogBrush, ::i32 nStyleCount = 0, const DWORD* pStyle = nullptr);*/
-
-
-      void update(::draw2d::graphics * pdraw2dgraphics) override;
-      void clear_node_data() override;
-
-
-   };
-
-
-} // namespace draw2d_haiku
-
-
+namespace draw2d_haiku {
+class pen : virtual public ::draw2d::pen {};
+}
