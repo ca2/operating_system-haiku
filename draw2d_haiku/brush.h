@@ -1,54 +1,5 @@
 #pragma once
-
-
 #include "aura/graphics/draw2d/brush.h"
-
-
-namespace draw2d_haiku
-{
-
-
-   class CLASS_DECL_DRAW2D_HAIKU brush :
-      virtual public ::draw2d::brush
-   {
-   public:
-
-
-      //__creatable_from_base(brush, ::draw2d::brush);
-
-
-      auto_pointer < Gdiplus::Brush >    m_pgdiplusbrush;
-
-
-      brush();
-      ~brush() override;
-
-//#ifdef DEBUG
-//
-//      void dump(dump_context & dumpcontext) const override;
-//
-//#endif
-
-      //virtual void * get_os_data() const;
-
-
-      void update(::draw2d::graphics * pdraw2dgraphics) override;
-      void clear_node_data() override;
-      // void destroy_os_data() override;
-
-      //bool create_solid(::color::color crColor);
-      //bool CreateHatchBrush(::i32 nIndex, ::color::color crColor);
-      //bool CreatePatternBrush(::draw2d::bitmap* pBitmap);
-      //bool CreateDIBPatternBrush(HGLOBAL hPackedDIB, UINT nUsage);
-      //bool CreateDIBPatternBrush(const void * pPackedDIB, UINT nUsage);
-
-      //bool CreateSysColorBrush(::i32 nIndex);
-
-
-
-   };
-
-
-} // namespace draw2d_haiku
-
-
+namespace draw2d_haiku {
+class brush : virtual public ::draw2d::brush {};
+}

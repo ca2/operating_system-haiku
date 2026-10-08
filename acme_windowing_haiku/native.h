@@ -18,3 +18,5 @@ void haiku_window_present(void *window,const void *premultiplied_bgra,int width,
 void haiku_screen_bounds(int *x,int *y,int *width,int *height);
 }
 extern "C" void haiku_mouse_position(int *x,int *y);
+extern "C" int haiku_screen_info(int index,int *bounds,int *workspace);
+extern "C" int haiku_window_is_active(void *window);

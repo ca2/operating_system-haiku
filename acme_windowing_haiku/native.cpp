@@ -38,14 +38,20 @@ application *app=nullptr;
 void notify(state *s,const haiku_window_event &event){if(!app)return;BMessage m(kEvent);m.AddInt64("id",s->id);m.AddData("event",B_RAW_TYPE,&event,sizeof(event));app->PostMessage(&m);}
 class view : public BView {
 public:
+ state *owner;
  std::unique_ptr<BBitmap> bitmap;
- view(BRect r):BView(r,"ca2-client",B_FOLLOW_ALL,B_WILL_DRAW|B_FRAME_EVENTS){SetViewColor(245,245,245);}
+ view(state *s,BRect r):BView(r,"ca2-client",B_FOLLOW_ALL,B_WILL_DRAW|B_FRAME_EVENTS),owner(s){SetViewColor(245,245,245);}
+ void mouse_event(int kind,BPoint p){auto screen=ConvertToScreen(p);notify(owner,{kind,int(p.x),int(p.y),int(screen.x),int(screen.y)});}
+ void MouseDown(BPoint p) override {SetMouseEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS);mouse_event(4,p);}
+ void MouseUp(BPoint p) override {mouse_event(5,p);}
+ void MouseMoved(BPoint p,uint32,const BMessage *) override {mouse_event(6,p);}
  void Draw(BRect) override {if(bitmap){SetDrawingMode(B_OP_ALPHA);SetBlendingMode(B_PIXEL_ALPHA,B_ALPHA_OVERLAY);DrawBitmap(bitmap.get(),BPoint(0,0));}}
 };
 class window : public BWindow {
 public:
  state *owner;view *client;
- window(state *s,const char *title,int x,int y,int w,int h):BWindow(BRect(x,y,x+w-1,y+h-1),title,B_TITLED_WINDOW,0),owner(s),client(new view(Bounds())){AddChild(client);}
+ window(state *s,const char *title,int x,int y,int w,int h):BWindow(BRect(x,y,x+w-1,y+h-1),title,B_NO_BORDER_WINDOW_LOOK,B_NORMAL_WINDOW_FEEL,0),owner(s),client(new view(s,Bounds())){AddChild(client);}
+ void WindowActivated(bool active) override {BWindow::WindowActivated(active);notify(owner,{7,active?1:0});}
  bool QuitRequested() override {notify(owner,{3});return false;}
  void FrameResized(float w,float h) override {notify(owner,{1,0,0,int(w)+1,int(h)+1});client->Invalidate();}
  void FrameMoved(BPoint p) override {notify(owner,{2,int(p.x),int(p.y)});}
@@ -84,3 +90,27 @@ extern "C" void haiku_window_present(void *p,const void *data,int w,int h,int st
 }
 extern "C" void haiku_screen_bounds(int *x,int *y,int *w,int *h){BScreen screen;auto f=screen.Frame();*x=int(f.left);*y=int(f.top);*w=f.IntegerWidth()+1;*h=f.IntegerHeight()+1;}
 extern "C" void haiku_mouse_position(int *x,int *y){*x=0;*y=0;state *s=nullptr;{std::lock_guard<std::mutex> guard(registry_mutex);if(!windows.empty())s=windows.begin()->second;}if(s && s->window->Lock()){auto *v=s->window->ChildAt(0);BPoint p;uint32 buttons;v->GetMouse(&p,&buttons,false);v->ConvertToScreen(&p);*x=int(p.x);*y=int(p.y);s->window->Unlock();}}
+#include <Deskbar.h>
+extern "C" int haiku_screen_info(int index,int *bounds,int *workspace){
+ if(index<0 || !bounds || !workspace)return 0;
+ BScreen screen;if(!screen.IsValid())return 0;
+ for(int i=0;i<index;i++)if(screen.SetToNext()!=B_OK)return 0;
+ auto frame=screen.Frame();auto work=frame;
+ BDeskbar deskbar;
+ if(deskbar.IsRunning() && !deskbar.IsAutoHide()){
+  auto bar=deskbar.Frame();
+  if(frame.Intersects(bar)){
+   switch(deskbar.Location()){
+    case B_DESKBAR_TOP:work.top=bar.bottom+1;break;
+    case B_DESKBAR_BOTTOM:work.bottom=bar.top-1;break;
+    case B_DESKBAR_LEFT_TOP:case B_DESKBAR_LEFT_BOTTOM:work.left=bar.right+1;break;
+    case B_DESKBAR_RIGHT_TOP:case B_DESKBAR_RIGHT_BOTTOM:work.right=bar.left-1;break;
+   }
+  }
+ }
+ bounds[0]=int(frame.left);bounds[1]=int(frame.top);bounds[2]=int(frame.right)+1;bounds[3]=int(frame.bottom)+1;
+ workspace[0]=int(work.left);workspace[1]=int(work.top);workspace[2]=int(work.right)+1;workspace[3]=int(work.bottom)+1;
+ return 1;
+}
+
+extern "C" int haiku_window_is_active(void *p){auto *s=static_cast<state *>(p);if(!s || !s->window->Lock())return 0;bool active=s->window->IsActive();s->window->Unlock();return active?1:0;}

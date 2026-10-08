@@ -1,96 +1,31 @@
 #pragma once
-
-
 #include "aura/graphics/draw2d/bitmap.h"
-#include "acme/prototype/prototype/memory.h"
-
-
-namespace draw2d_haiku
-{
-
-
-   class CLASS_DECL_DRAW2D_HAIKU bitmap :
-      virtual public ::draw2d::bitmap
-   {
-   public:
-
-
-      //__creatable_from_base(bitmap, ::draw2d::bitmap);
-
-
-      auto_pointer < ::Gdiplus::Bitmap >  m_pgdiplusbitmap;
-      memory                              m_mem;
-      //::image32_t *         m_pimage32Host;
-
-
-      bitmap();
-      bitmap(bitmap && bitmap);
-      ~bitmap() override;
-
-//#ifdef DEBUG
-//
-//      void dump(dump_context & dumpcontext) const override;
-//
-//#endif
-
-      void clear_node_data() override;
-
-      bool LoadBitmap(const ::scoped_string & scopedstrResourceName);
-
-      bool LoadBitmap(UINT nIDResource);
-      bool LoadOEMBitmap(UINT nIDBitmap); // for OBM_/OCR_/OIC_
-
-
-      void update_bitmap_as_image_render_target(
-         ::image::image * pimage,
-         ::draw2d::domain * pdraw2ddomain = nullptr,
-         ::draw2d::graphics * pdraw2dgraphics = nullptr) override;
-      void preserve_image(const ::i32_size& size, ::image::image* pimage) override;
-      bool CreateBitmap(::draw2d::graphics * pdraw2dgraphics, ::i32 nWidth, ::i32 nHeight, UINT nPlanes, UINT nBitcount, const void * pBits, ::i32 stride);
-
-      bool CreateBitmapIndirect(::draw2d::graphics * pdraw2dgraphics, LPBITMAP pBitmap);
-
-      void CreateCompatibleBitmap(::draw2d::graphics * pdraw2dgraphics, ::i32 nWidth, ::i32 nHeight);
-      void CreateDiscardableBitmap(::draw2d::graphics * pdraw2dgraphics, ::i32 nWidth, ::i32 nHeight);
-      //virtual bool host_bitmap(::draw2d::graphics * pdraw2dgraphics, pixmap_t* ppximap) override;
-      void create_bitmap(::draw2d::graphics * pdraw2dgraphics, const ::i32_size & size, ::pixmap * ppixmapOwned) override;
-      virtual void CreateDIBitmap(::draw2d::graphics * pdraw2dgraphics, ::i32 cx, ::i32 cy, ::u32 flInit, const void *pjBits, UINT iUsage) override;
-
-
-      void read_pixels(const ::i32_size & size, const ::i32_point & point, ::image32_t * pimage32, ::i32 iScan) override;
-      bool is_cpu_backed_by(const ::pixmap_t * ppixmap) const override;
-      void write_pixels(const ::i32_size & size, const ::i32_point & point, const ::image32_t * pimage32, ::i32 iScan, bool bTopDown) override;
-
-
-
-      ::i32 GetBitmap(BITMAP* pBitMap);
-
-
-      ::u32 SetBitmapBits(::u32 dwCount, const void * pBits);
-
-      ::u32 GetBitmapBits(::u32 dwCount, LPVOID pBits) const;
-
-      ::i32_size SetBitmapDimension(::i32 nWidth, ::i32 nHeight);
-      //::i32_size GetBitmapDimension() const;
-
-      ::i32_size size() const override;
-      void set_size(const ::i32_size & size, bool bPreserve = true) override;
-
-
-      //virtual void attach(void * posdata);
-      //virtual void * detach();
-
-      virtual HBITMAP _GetHBITMAP();
-      virtual void _ReleaseHBITMAP(HBITMAP hbitmap);
-
-
-      ::string _001_os_bitmap_diagnostics() override;
-
-
-   };
-
-
-} // namespace draw2d_haiku
-
-
-
+#include <Bitmap.h>
+#include <View.h>
+namespace draw2d_haiku {
+class bitmap : virtual public ::draw2d::bitmap {
+public:
+ BBitmap *m_pbbitmap=nullptr;
+ BView *m_pbview=nullptr; // Owned by BBitmap.
+ int m_iSavedState=0;
+ ~bitmap() override;
+ void destroy() override;
+ void create_bitmap(::draw2d::graphics *,const ::i32_size &) override;
+ void create_bitmap(::draw2d::graphics *,const ::i32_size &,::pixmap *) override;
+ ::i32 stride_for_width(::i32 w) override {return w*4;}
+ ::i32_size size() const override {return m_size;}
+ void set_size(const ::i32_size &,bool preserve=false) override;
+ void write_pixels(const ::i32_size &,const ::i32_point &,const ::image32_t *,::i32,bool) override;
+ void read_pixels();
+ void commit_pixels();
+};
+class graphics_lock {
+public:
+ bitmap *m_pbitmap;
+ explicit graphics_lock(bitmap *p) : m_pbitmap(p) {
+  if(!p || !p->m_pbbitmap || !p->m_pbview || !p->m_pbbitmap->Lock())
+   throw ::exception(error_wrong_state,"No Haiku drawing bitmap");
+ }
+ ~graphics_lock(){m_pbitmap->m_pbview->Sync();m_pbitmap->m_pbbitmap->Unlock();}
+};
+}
