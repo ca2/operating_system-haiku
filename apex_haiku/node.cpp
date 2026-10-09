@@ -7,6 +7,66 @@
 #include "apex/platform/node.h"
 #include "apex/filesystem/file/set.h"
 #include "apex/platform/system.h"
+#include "acme/filesystem/filesystem/listing.h"
+#include <Directory.h>
+#include <Entry.h>
+#include <Path.h>
+#include <Volume.h>
+#include <VolumeRoster.h>
+#include <FindDirectory.h>
+
+void apex_haiku::node::root_ones(::file::listing_base &listing)
+{
+   auto add_root = [&](::file::path path, const ::scoped_string &title,
+                       const ::file::path &physicalPath = {})
+   {
+      BDirectory folder((physicalPath.has_character() ? physicalPath : path).c_str());
+      if (folder.InitCheck() != B_OK) return;
+      for (const auto &existing : listing)
+         if (existing == path) return;
+      path.set_existent_folder();
+      listing.insert_at(listing.size(), path);
+      listing.m_straTitle.add(title);
+   };
+
+   BPath userHome;
+   if (find_directory(B_USER_DIRECTORY, &userHome) == B_OK)
+   {
+      ::file::path home(userHome.Path());
+      add_root(home, "Home");
+      add_root(home / "Desktop", "Desktop");
+      add_root(home / "Documents", "Documents");
+      add_root(home / "Downloads", "Downloads");
+      // Keep the user-facing protocol roots; directory_context supplies their
+      // Haiku-specific physical paths and directory_system creates the folders.
+      add_root("image://", "Image", directory()->image());
+      add_root("music://", "Music", directory()->music());
+      add_root("video://", "Video", directory()->video());
+   }
+   add_root("/", "File System");
+
+   BVolumeRoster volumes;
+   BVolume volume;
+   while (volumes.GetNextVolume(&volume) == B_OK)
+   {
+      if (!volume.IsPersistent()) continue;
+      BDirectory root;
+      BEntry entry;
+      BPath path;
+      char name[B_FILE_NAME_LENGTH] = {};
+      if (volume.GetRootDirectory(&root) != B_OK || root.GetEntry(&entry) != B_OK
+         || entry.GetPath(&path) != B_OK) continue;
+      ::file::path volumeRoot(path.Path());
+      // Package/system mounts are reachable through File System; keep the
+      // convenience list for user locations and additional data volumes.
+      if (volumeRoot == "/boot" || volumeRoot == "/boot/system"
+         || volumeRoot == (::file::path(userHome.Path()) / "config")) continue;
+      if (volume.GetName(name) == B_OK)
+         add_root(path.Path(), name);
+      else
+         add_root(path.Path(), path.Path());
+   }
+}
 #define __BSD_VISIBLE 1
 #include <unistd.h>
 

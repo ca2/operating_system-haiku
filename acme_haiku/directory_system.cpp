@@ -24,6 +24,11 @@ namespace acme_haiku
       //auto estatus =
 
       ::directory_system::initialize(pparticle);
+      // directory_context::home() reads this cache, while the POSIX home()
+      // method resolves HOME directly. Keep both layers in agreement.
+      m_pathHome = home();
+      if (m_pathHome.is_empty())
+         throw ::exception(error_failed, "Haiku home directory is unavailable");
 
 
    }
@@ -33,6 +38,12 @@ namespace acme_haiku
    {
 
       ::directory_system::init_system();
+      // Haiku does not define standard media directories. Provide ca2's
+      // desktop defaults without replacing or moving any existing content.
+      auto userHome = home();
+      create(userHome / "Image");
+      create(userHome / "Music");
+      create(userHome / "Video");
 
    }
 

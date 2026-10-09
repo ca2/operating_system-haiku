@@ -1,9 +1,13 @@
 #pragma once
 #include "window.h"
 #include "apex/innate_ui/still.h"
+#include "icon.h"
 namespace innate_ui_haiku {
 class CLASS_DECL_INNATE_UI_HAIKU still : virtual public window, virtual public ::innate_ui::still {
 public:
+ bool m_iconStill = false;
+ ::pointer<icon> m_icon;
+ void set_icon(::innate_ui::icon *) override;
  BView *new_view() override;
  void set_text(const ::scoped_string &) override;
  void set_font_size(::f64) override;

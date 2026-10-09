@@ -35,6 +35,7 @@ namespace draw2d_haiku
       ::i32 stride_for_width(::i32 w) override { return w * 4; }
       ::i32_size size() const override { return m_size; }
       void set_size(const ::i32_size &, bool preserve = false) override;
+      void preserve_image(const ::i32_size &, ::image::image *) override;
       void write_pixels(const ::i32_size &, const ::i32_point &, const ::image32_t *, ::i32, bool) override;
       void read_pixels();
       void commit_pixels();

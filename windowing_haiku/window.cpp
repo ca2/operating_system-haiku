@@ -15,6 +15,7 @@
 #include "aura/platform/session.h"
 #include <InterfaceDefs.h>
 #include "innate_ui_haiku/menu.h"
+#include "acme/operating_system/a_system_menu.h"
 
 namespace windowing_haiku
 {
@@ -219,24 +220,34 @@ namespace windowing_haiku
       {
          auto *interaction = self->user_interaction();
          if (!interaction || !self->is_window()) return;
+         auto model = interaction->create_system_menu(true);
+         if (!model) return;
          auto menu = self->create_newø<::innate_ui_haiku::menu>();
          menu->m_screenPoint = BPoint(point.x, point.y);
-         menu->add_item("Restore", 1);
-         menu->add_item("Minimize", 2);
-         menu->add_item("Maximize", 3);
-         menu->add_separator();
-         menu->add_item("Close", 4);
-         menu->track_popup_menu(self->operating_system_window(), [self](::i32 command)
+         for (::collection::index i = 0; i < model->get_count(); ++i)
+         {
+            auto item = model->element_at(i);
+            if (item->m_strAtom == "(separator)" || item->m_strName.is_empty())
+               menu->add_separator();
+            else
+            {
+               menu->add_item(item->m_strName, (::i32)i + 1);
+               // Interactive Move/Size require a drag protocol not yet ported to Haiku.
+               if (item->m_strAtom.begins("***"))
+                  menu->set_item_enabled((::i32)i + 1, false);
+            }
+         }
+         menu->track_popup_menu(self->operating_system_window(), [self,model](::i32 command)
          {
             auto *interaction = self->user_interaction();
-            if (!interaction) return;
-            switch (command)
-            {
-            case 1: interaction->display(e_display_normal); break;
-            case 2: interaction->display(e_display_iconic); break;
-            case 3: interaction->display(e_display_zoomed); break;
-            case 4: interaction->post_message(::user::e_message_close); break;
-            }
+            if (!interaction || command <= 0 || command > model->get_count()) return;
+            auto item = model->element_at(command - 1);
+            const auto &action = item->m_strAtom;
+            if (action == "restore" || action == "minimize" || action == "maximize"
+               || action == "close" || action == "about_box")
+               self->_on_window_simple_action(action.c_str(), nullptr);
+            else
+               interaction->handle_command(::atom(action));
          });
       });
    }

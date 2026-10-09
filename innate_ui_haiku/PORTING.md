@@ -9,6 +9,6 @@ control positioning/sizing, label fonts and preferred sizes, show/hide/activatio
 and dispatch through the existing Haiku application event loop.
 
 Native BPopUpMenu support also provides the Haiku title-bar context menu.
-This first adaptation does not implement icons, Windows resource-menu loading,
-or text input. create_icon_still currently creates a label.
-Windows icon source files are historical reference, not active factories.
+Native bitmap icons use Haiku's Translation Kit and a BView for display.
+Top-level dialogs are retained by innate_ui so they survive the creation callback.
+This first adaptation does not implement Windows resource-menu loading or text input.

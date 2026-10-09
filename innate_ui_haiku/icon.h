@@ -1,35 +1,12 @@
-// Created by camilo on 2024-09-13 07:18 <3ThomasBorregaardSorensen!!
 #pragma once
-
-
+#include "_.h"
 #include "apex/innate_ui/icon.h"
-
-
-namespace innate_ui_win32
-{
-
-
-   class CLASS_DECL_INNATE_UI_WIN32 icon :
-      virtual public ::innate_ui::icon
-   {
-   public:
-
-
-      HICON m_hicon;
-      HICON m_hiconSmall;
-
-      icon();
-      ~icon() override;
-
-
-      void _create() override;
-
-
-
-   };
-
-
-} // namespace innate_ui
-
-
-
+#include <Bitmap.h>
+namespace innate_ui_haiku {
+class CLASS_DECL_INNATE_UI_HAIKU icon : virtual public ::innate_ui::icon {
+public:
+ BBitmap *m_bitmap = nullptr;
+ ~icon() override;
+ void _create() override;
+};
+}

@@ -5,6 +5,7 @@
 #include "graphics.h"
 #include "monitor.h"
 #include "text_composition_client.h"
+#include "shell.h"
 #include "aura/windowing/keyboard.h"
 #include "aura/windowing/cursor.h"
 IMPLEMENT_FACTORY(windowing_haiku){
@@ -16,4 +17,5 @@ IMPLEMENT_FACTORY(windowing_haiku){
  pfactory->add_factory_item<::windowing::keyboard>();
  pfactory->add_factory_item<::windowing::cursor>();
  pfactory->add_factory_item<::windowing_haiku::text_composition_client,::user::text_composition_client>();
+ pfactory->add_factory_item<::windowing_haiku::shell,::user::shell>();
 }

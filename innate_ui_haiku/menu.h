@@ -13,6 +13,7 @@ public:
  ~menu() override;
  void add_item(const ::scoped_string &, int) override;
  void add_separator() override;
+ void set_item_enabled(::i32, bool);
  void set_default_menu_item_command_id(::i32) override;
  void erase_menu_item_by_command_id(::i32) override;
  void track_popup_menu(const ::operating_system::window &, const ::function<void(::i32)> &) override;

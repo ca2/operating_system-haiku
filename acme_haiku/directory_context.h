@@ -23,6 +23,9 @@ namespace acme_haiku
 
       void init_system() override;
       void init_context() override;
+      ::file::path image() override;
+      ::file::path music() override;
+      ::file::path video() override;
 
 
 

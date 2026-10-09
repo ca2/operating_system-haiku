@@ -1,29 +1,13 @@
-// Created by camilo on 2024-09-13 07:23 <3ThomasBorregaardSorensen!!
 #include "platform.h"
 #include "icon.h"
-
-
-namespace innate_ui_win32
-{
-
-
-   icon::icon()
-   {
-      m_hicon = nullptr;
-      m_hiconSmall = nullptr;
-   }
-
-
-   icon::~icon()
-   {
-
-   }
-
-
-   void icon::_create()
-   {
-   }
-
-
-
-} // namespace innate_ui
+#include <TranslationUtils.h>
+#include <DataIO.h>
+namespace innate_ui_haiku {
+icon::~icon() { delete m_bitmap; }
+void icon::_create() {
+ BMemoryIO input(m_memory.data(), m_memory.size());
+ auto *bitmap = BTranslationUtils::GetBitmap(&input);
+ if (!bitmap) throw ::exception(error_failed, "Haiku could not decode dialog icon");
+ delete m_bitmap; m_bitmap = bitmap;
+}
+}

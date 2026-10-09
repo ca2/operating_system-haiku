@@ -1,6 +1,7 @@
 #include "platform.h"
 #include "window.h"
 #include "button.h"
+#include "apex/innate_ui/innate_ui.h"
 #include "acme/platform/system.h"
 #include "acme/windowing/windowing.h"
 #include "acme/operating_system/window.h"
@@ -53,9 +54,14 @@ void window::create() {
  if (!be_app) throw ::exception(error_wrong_state, "Haiku BApplication must be initialized first");
  m_nativeWindow = new native_window(this);
  m_nativeView = new BView(m_nativeWindow->Bounds(), "ca2-content", B_FOLLOW_ALL, B_WILL_DRAW);
- m_nativeView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+ m_nativeView->SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
+ m_nativeView->SetLowUIColor(B_PANEL_BACKGROUND_COLOR);
+ m_nativeView->SetHighUIColor(B_PANEL_TEXT_COLOR);
  m_nativeWindow->AddChild(m_nativeView);
  set_text(m_text);
+ // Dialog creation is posted in a temporary callback. Retain the native
+ // window after that callback releases its local dialog pointer.
+ innate_ui()->add_top_level_window(this);
 }
 void window::create_child(::innate_ui::window *parent) {
  auto *nativeParent = dynamic_cast<window *>(parent);

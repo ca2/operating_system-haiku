@@ -2,6 +2,7 @@
 #include "platform.h"
 #include "acme/graphics/image/pixmap.h"
 #include "bitmap.h"
+#include "aura/graphics/image/image.h"
 #include <cmath>
 
 namespace draw2d_haiku
@@ -32,6 +33,30 @@ namespace draw2d_haiku
    {
       if (s.cx <= 0 || s.cy <= 0 || s.cx > 32767 || s.cy > 32767)
          throw ::exception(error_bad_argument);
+      // A mapped image can reference this bitmap's CPU buffer. Snapshot its
+      // pixels before destroy/reallocation/clearing can invalidate that source.
+      ::memory saved;
+      bool aliasesBuffer = pixels && pixels->m_pimage32Raw
+         && pixels->m_pimage32Raw == reinterpret_cast<::image32_t *>(m_memoryDraw2dBitmap.data());
+      ::i32_size copySize;
+      ::i32 copyScan = 0;
+      if (pixels && pixels->m_pimage32Raw && pixels->m_iScan > 0)
+      {
+         copySize = {minimum(s.cx, minimum(pixels->m_sizeRaw.cx, pixels->m_iScan / 4)),
+                     minimum(s.cy, pixels->m_sizeRaw.cy)};
+         if (copySize.cx > 0 && copySize.cy > 0)
+         {
+            copyScan = copySize.cx * 4;
+            saved.set_size((::memsize)copyScan * copySize.cy);
+            for (int y = 0; y < copySize.cy; ++y)
+            {
+               auto sourceY = pixels->m_bTopLeft ? y : pixels->m_sizeRaw.cy - 1 - y;
+               auto *source = reinterpret_cast<const ::u8 *>(pixels->m_pimage32Raw)
+                  + (::memsize)sourceY * pixels->m_iScan;
+               memory_copy(saved.data() + (::memsize)y * copyScan, source, copyScan);
+            }
+         }
+      }
       destroy();
       m_pbbitmap = new BBitmap(BRect(0, 0, s.cx - 1, s.cy - 1), B_BITMAP_ACCEPTS_VIEWS, B_RGBA32);
       if (m_pbbitmap->InitCheck() != B_OK || !m_pbbitmap->Lock())
@@ -41,14 +66,20 @@ namespace draw2d_haiku
       m_pbbitmap->AddChild(m_pbview);
       m_pbbitmap->Unlock();
       m_size = s;
-      m_memoryDraw2dBitmap.set_size(s.cx * 4 * s.cy);
+      m_iStride = s.cx * 4;
+      m_memoryDraw2dBitmap.set_size((::memsize)m_iStride * s.cy);
       memory_set(m_memoryDraw2dBitmap.data(), 0, m_memoryDraw2dBitmap.size());
-      if (pixels && pixels->m_pimage32Raw && pixels->m_iScan > 0)
+      if (saved.size() > 0)
+         write_pixels(copySize, {}, reinterpret_cast<const ::image32_t *>(saved.data()), copyScan, true);
+      if (aliasesBuffer)
       {
-         ::i32_size copySize(minimum(s.cx, minimum(pixels->m_sizeRaw.cx, pixels->m_iScan / 4)),
-                             minimum(s.cy, pixels->m_sizeRaw.cy));
-         if (copySize.cx > 0 && copySize.cy > 0)
-            write_pixels(copySize, {}, pixels->m_pimage32Raw, pixels->m_iScan, true);
+         // Keep the image's borrowed pixmap valid for later acquisitions too.
+         pixels->m_memoryPixmap.reference_data(m_memoryDraw2dBitmap.data(), m_memoryDraw2dBitmap.size());
+         pixels->m_pimage32Raw = reinterpret_cast<::image32_t *>(m_memoryDraw2dBitmap.data());
+         pixels->m_iScan = m_iStride;
+         pixels->m_sizeRaw = s;
+         pixels->m_bTopLeft = true;
+         pixels->pixmap_map();
       }
    }
 
@@ -68,14 +99,42 @@ namespace draw2d_haiku
          write_pixels(old, {}, (const ::image32_t *)saved.data(), old.cx * 4, true);
    }
 
+   void bitmap::preserve_image(const ::i32_size &size, ::image::image *image)
+   {
+      if (!image || size.is_empty() || image->m_pdraw2dbitmap != this)
+         throw ::exception(error_bad_argument);
+      if (image->has_active_destination_graphics_lease() || image->m_pimagepixmaplease
+         || (image->m_ppixmapOwned && image->m_ppixmapOwned->m_interlockedcountMap > 0))
+         throw ::exception(error_wrong_state, "Cannot preserve an image while mapped or drawing");
+      if (!m_pbbitmap || !m_pbview || m_pbbitmap->InitCheck() != B_OK)
+         throw ::exception(error_wrong_state, "No Haiku bitmap to preserve");
+
+      // Flush CPU edits before copying native pixels. set_size preserves the
+      // overlap and initializes the newly allocated pixels to transparent.
+      if (image->m_bWasMappedAfterLastGraphicsAcquisition && image->m_ppixmapOwned)
+         defer_write_pixels(*image->m_ppixmapOwned);
+      auto sizeRaw = image->raw_size().maximum(image->m_point + size);
+      set_size(sizeRaw, true);
+      image->m_size = size;
+      image->m_sizeRaw = sizeRaw;
+      image->m_iScan = m_iStride;
+      // Rebuild borrowed mappings on demand instead of retaining an old address.
+      image->m_ppixmapOwned.release();
+      image->m_bGraphicsWasAcquiredAfterLastMap = true;
+      image->m_bWasMappedAfterLastGraphicsAcquisition = false;
+   }
+
    void bitmap::write_pixels(const ::i32_size &s, const ::i32_point &point, const ::image32_t *data, ::i32 scan,
                              bool topDown)
    {
       if (!data || scan < s.cx * 4 || s.cx <= 0 || s.cy <= 0)
          throw ::exception(error_bad_argument);
       ::memory copy;
-      copy.set_size(scan * s.cy);
-      memory_copy(copy.data(), data, copy.size());
+      auto copyScan = s.cx * 4;
+      copy.set_size((::memsize)copyScan * s.cy);
+      for (int y = 0; y < s.cy; ++y)
+         memory_copy(copy.data() + (::memsize)y * copyScan,
+            reinterpret_cast<const ::u8 *>(data) + (::memsize)y * scan, copyScan);
       read_pixels();
       for (int y = 0; y < s.cy; y++)
       {
@@ -85,7 +144,7 @@ namespace draw2d_haiku
          int start = maximum(0, -point.x), end = minimum(s.cx, m_size.cx - point.x);
          if (end <= start)
             continue;
-         auto *src = copy.data() + (topDown ? y : s.cy - 1 - y) * scan + start * 4;
+         auto *src = copy.data() + (::memsize)(topDown ? y : s.cy - 1 - y) * copyScan + start * 4;
          auto *dst = m_memoryDraw2dBitmap.data() + (dy * m_size.cx + point.x + start) * 4;
          memory_copy(dst, src, (end - start) * 4);
       }

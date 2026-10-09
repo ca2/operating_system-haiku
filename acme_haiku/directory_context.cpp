@@ -45,6 +45,24 @@ namespace acme_haiku
    }
 
 
+   ::file::path directory_context::image()
+   {
+      m_pathImage = home() / "Image";
+      return m_pathImage;
+   }
+
+   ::file::path directory_context::music()
+   {
+      m_pathMusic = home() / "Music";
+      return m_pathMusic;
+   }
+
+   ::file::path directory_context::video()
+   {
+      m_pathVideo = home() / "Video";
+      return m_pathVideo;
+   }
+
    ::file::listing_base & directory_context::root_ones(::file::listing_base & listing)
    {
 

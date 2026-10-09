@@ -138,9 +138,18 @@ namespace draw2d_haiku
          auto pbitmap = ptarget->get_bitmap_as_target(this);
 
          set(pbitmap);
+         // get_bitmap_as_target has already uploaded any owned CPU pixels.
+         // Subsequent drawing makes this bitmap authoritative; leaving the
+         // mapped flag set would re-upload stale pixels when sampled as source.
+         ptarget->m_bWasMappedAfterLastGraphicsAcquisition = false;
       }
 
       ::draw2d::graphics::on_acquire_memory_graphics(external, ptarget, size, domain);
+      // A fresh BView defaults to B_OP_COPY, which leaves destination alpha
+      // untouched when drawing a bitmap. Match the framework/Cairo default
+      // source-over behavior when no explicit alpha mode was requested.
+      set_alpha_mode(m_ealphamode == ::draw2d::e_alpha_mode_none
+         ? ::draw2d::e_alpha_mode_blend : m_ealphamode);
    }
 
 
@@ -968,6 +977,9 @@ namespace draw2d_haiku
    {
       if (!pimageSource)
          throw ::exception(error_null_pointer);
+      // Animated images store pixels in their composed frame images, not in
+      // the container. Resolve the frame for the current animation time first.
+      pimageSource = pimageSource->get_source_image();
       auto b = pimageSource->get_bitmap_as_source(this);
       auto *native = dynamic_cast<bitmap *>(b.m_p);
       if (!native)
@@ -993,7 +1005,20 @@ namespace draw2d_haiku
       graphics_lock lock(target_bitmap());
       _001ColorSelect(::argb(255, 255, 255, 255));
       static int traceBlit=0;if(traceBlit++<5)fprintf(stderr,"BLIT dst=%g,%g,%g,%g target=%g,%g matrix=%g,%g\n",rectangleTarget.left,rectangleTarget.top,rectangleTarget.right,rectangleTarget.bottom,m_pointTarget.x,m_pointTarget.y,m_matrix.c1,m_matrix.c2);
-      lock.m_pbitmap->m_pbview->DrawBitmap(&copy, as_brect(rectangleSource), as_brect(rectangleTarget), B_FILTER_BITMAP_BILINEAR);
+      auto view = lock.m_pbitmap->m_pbview;
+      view->PushState();
+      if (m_ealphamode == ::draw2d::e_alpha_mode_set)
+      {
+         // B_OP_COPY bitmap drawing does not copy the source alpha. Clear the
+         // target first, then composite over transparent pixels for true RGBA copy.
+         view->SetDrawingMode(B_OP_COPY);
+         view->SetHighColor(0, 0, 0, 0);
+         view->FillRect(as_brect(rectangleTarget));
+      }
+      view->SetDrawingMode(B_OP_ALPHA);
+      view->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_COMPOSITE);
+      view->DrawBitmap(&copy, as_brect(rectangleSource), as_brect(rectangleTarget), B_FILTER_BITMAP_BILINEAR);
+      view->PopState();
    }
 
    void graphics::_add_shape(const ::f64_rectangle &polygon)

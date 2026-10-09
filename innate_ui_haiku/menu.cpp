@@ -14,6 +14,14 @@ void menu::add_item(const ::scoped_string &text, int id) {
  m_menu->AddItem(new BMenuItem(label.c_str(),message));
 }
 void menu::add_separator() { m_menu->AddSeparatorItem(); }
+void menu::set_item_enabled(::i32 id, bool enabled) {
+ for(int32 i=0;i<m_menu->CountItems();++i) {
+  auto *item=m_menu->ItemAt(i);int32 command=0;
+  if(item->Message() && item->Message()->FindInt32("command",&command)==B_OK && command==id) {
+   item->SetEnabled(enabled);return;
+  }
+ }
+}
 void menu::set_default_menu_item_command_id(::i32 id) {
  for(int32 i=0;i<m_menu->CountItems();++i) {
   auto *item=m_menu->ItemAt(i);int32 command=0;
