@@ -22,6 +22,7 @@
 #include <GradientLinear.h>
 #include <GradientRadial.h>
 #include <cmath>
+#include <vector>
 
 
 namespace draw2d_haiku
@@ -389,6 +390,38 @@ namespace draw2d_haiku
       f.GetHeight(&h);
 
       graphics_lock lock(target_bitmap());
+
+      if (m_pdraw2dbrush && m_pdraw2dbrush->m_ebrush != ::draw2d::e_brush_solid
+         && m_pdraw2dbrush->m_ebrush != ::draw2d::e_brush_null)
+      {
+         struct glyph_offset : BShapeIterator
+         {
+            BPoint offset;
+            status_t IterateMoveTo(BPoint *point) override { *point += offset; return B_OK; }
+            status_t IterateLineTo(int32 count, BPoint *points) override
+            { for (int32 i = 0; i < count; ++i) points[i] += offset; return B_OK; }
+            status_t IterateBezierTo(int32 count, BPoint *points) override
+            { return IterateLineTo(count * 3, points); }
+         } translate;
+         int32 count = s.unichar_count();
+         std::vector<BShape> shapes(count);
+         std::vector<BShape *> glyphs(count);
+         std::vector<float> advances(count);
+         for (int32 i = 0; i < count; ++i)
+            glyphs[i] = &shapes[i];
+         f.GetGlyphShapes(s.c_str(), count, glyphs.data());
+         f.GetEscapements(s.c_str(), count, advances.data());
+         m_bshape.Clear();
+         translate.offset = BPoint(x, y + h.ascent);
+         for (int32 i = 0; i < count; ++i)
+         {
+            translate.Iterate(glyphs[i]);
+            m_bshape.AddShape(glyphs[i]);
+            translate.offset.x += advances[i] * f.Size();
+         }
+         _paint_shape(m_pdraw2dbrush, nullptr, false);
+         return;
+      }
 
       _001ColorSelect(m_pdraw2dbrush ? m_pdraw2dbrush->m_color : ::argb(255, 0, 0, 0));
 
