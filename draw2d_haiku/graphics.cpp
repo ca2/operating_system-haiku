@@ -16,6 +16,7 @@
 #include "aura/graphics/draw2d/path.h"
 #include "aura/graphics/draw2d/brush.h"
 #include "aura/graphics/draw2d/pen.h"
+#include "aura/graphics/write_text/text_out.h"
 #include "aura/graphics/image/drawing.h"
 #include "acme/exception/interface_only.h"
 #include <AffineTransform.h>
@@ -749,6 +750,24 @@ namespace draw2d_haiku
       return true;
    }
 
+   void graphics::fill_polygon(const ::f64_point *points, ::collection::count count)
+   {
+      if (count < 3 || !m_pdraw2dbrush || m_pdraw2dbrush->m_ebrush == ::draw2d::e_brush_null)
+         return;
+      if (!points)
+         throw ::exception(error_null_pointer);
+      if (m_bTargetRectangleModified)
+         defer_on_target_rectangle_update();
+
+      m_bshape.Clear();
+      m_bshape.MoveTo(BPoint(points[0].x, points[0].y));
+      for (::collection::index i = 1; i < count; ++i)
+         m_bshape.LineTo(BPoint(points[i].x, points[i].y));
+      m_bshape.Close();
+      m_bBeginFigure = true;
+      _paint_shape(m_pdraw2dbrush, nullptr, m_efillmode == ::draw2d::e_fill_mode_alternate);
+   }
+
    bool graphics::_set(const ::f64_polygon_base &polygon)
    {
       for (::collection::index i = 1; i < polygon.get_count(); i++)
@@ -778,6 +797,60 @@ namespace draw2d_haiku
       m_bBeginFigure = true;
       _arc_shape(ellipse.left, ellipse.top, ellipse.right, ellipse.bottom, 0, 2 * MATH_PI);
       m_bshape.Close();
+      m_bBeginFigure = true;
+      return true;
+   }
+
+   bool graphics::_set(const ::write_text::text_out &textout)
+   {
+      if (textout.m_strText.is_empty())
+         return true;
+
+      BFont nativeFont(be_plain_font);
+      ::cast<font> pathFont = textout.m_pwritetextfont
+         ? textout.m_pwritetextfont : m_pwritetextfont;
+      if (pathFont)
+      {
+         pathFont->update(this);
+         nativeFont = *pathFont->m_pbfont;
+      }
+
+      struct glyph_translation : BShapeIterator
+      {
+         BPoint offset;
+         status_t IterateMoveTo(BPoint *point) override
+         { *point += offset; return B_OK; }
+         status_t IterateLineTo(int32 count, BPoint *points) override
+         {
+            for (int32 i = 0; i < count; ++i)
+               points[i] += offset;
+            return B_OK;
+         }
+         status_t IterateBezierTo(int32 count, BPoint *points) override
+         { return IterateLineTo(count * 3, points); }
+      } translate;
+
+      // Haiku expects a glyph slot per UTF-8 character, rather than per byte.
+      int32 count = textout.m_strText.unichar_count();
+      std::vector<BShape> shapes(count);
+      std::vector<BShape *> glyphs(count);
+      std::vector<float> advances(count);
+      for (int32 i = 0; i < count; ++i)
+         glyphs[i] = &shapes[i];
+      nativeFont.GetGlyphShapes(textout.m_strText.c_str(), count, glyphs.data());
+      nativeFont.GetEscapements(textout.m_strText.c_str(), count, advances.data());
+
+      font_height height{};
+      nativeFont.GetHeight(&height);
+      // Path text uses a top-left origin; native glyphs use the baseline.
+      translate.offset = BPoint(textout.m_point.x, textout.m_point.y + height.ascent);
+      for (int32 i = 0; i < count; ++i)
+      {
+         translate.Iterate(glyphs[i]);
+         // Append so paths containing both geometry and text remain intact.
+         m_bshape.AddShape(glyphs[i]);
+         translate.offset.x += advances[i] * nativeFont.Size();
+      }
       m_bBeginFigure = true;
       return true;
    }

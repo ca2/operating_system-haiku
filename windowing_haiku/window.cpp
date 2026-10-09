@@ -14,6 +14,7 @@
 #include "aura/message/user.h"
 #include "aura/platform/session.h"
 #include <InterfaceDefs.h>
+#include "innate_ui_haiku/menu.h"
 
 namespace windowing_haiku
 {
@@ -65,6 +66,28 @@ namespace windowing_haiku
 
    void window::native_event(const haiku_window_event &e)
    {
+      if (e.kind == 12)
+      {
+         if (auto *ui = user_interaction())
+         {
+            ::pointer<window> self = this;
+            ui->post([self,e]()
+            {
+               if (auto *interaction = self->user_interaction())
+               {
+                  auto message = self->create_newø<::message::mouse_wheel>();
+                  message->m_eusermessage = ::user::e_message_mouse_wheel;
+                  message->m_operatingsystemwindow = self->operating_system_window();
+                  message->m_pwindow = self;
+                  message->m_pointHost = {e.x, e.y};
+                  message->m_pointAbsolute = {e.width, e.height};
+                  message->m_Δ = e.wheel_delta;
+                  interaction->send_message(message);
+               }
+            });
+         }
+         return;
+      }
       if (e.kind == 8 || e.kind == 9 || e.kind == 11)
       {
          if (auto *ui = user_interaction())
@@ -150,6 +173,8 @@ namespace windowing_haiku
                self->on_window_activate(e.x, false, self->operating_system_window());
                if (auto *interaction = self->user_interaction())
                {
+                  if (e.x && interaction->const_layout().sketch().display() == e_display_iconic)
+                     interaction->display(e_display_normal);
                   interaction->set_need_redraw();
                   interaction->post_redraw();
                }
@@ -157,14 +182,16 @@ namespace windowing_haiku
          }
          return;
       }
-      if (e.kind >= 4 && e.kind <= 6)
+      if ((e.kind >= 4 && e.kind <= 6) || e.kind == 13 || e.kind == 14)
       {
          m_pointCursor2 = {e.x, e.y};
          if (m_pacmewindowingdisplayWindow)
             m_pacmewindowingdisplayWindow->m_pointCursor2 = {e.width, e.height};
          if (auto *ui = user_interaction())
             ui->post_message(
-               e.kind == 4
+               e.kind == 13 ? ::user::e_message_right_button_down
+                  : e.kind == 14 ? ::user::e_message_right_button_up
+                  : e.kind == 4
                   ? ::user::e_message_left_button_down
                   : e.kind == 5
                   ? ::user::e_message_left_button_up
@@ -180,6 +207,38 @@ namespace windowing_haiku
          if (e.kind == 2)
             m_pointWindow = {e.x, e.y};
       ::haiku::acme::windowing::window::native_event(e);
+   }
+
+   void window::defer_show_system_menu(::user::mouse *mouse)
+   {
+      auto *ui = user_interaction();
+      if (!ui || !mouse) return;
+      auto point = mouse->m_pointAbsolute;
+      ::pointer<window> self = this;
+      ui->post([self,point]()
+      {
+         auto *interaction = self->user_interaction();
+         if (!interaction || !self->is_window()) return;
+         auto menu = self->create_newø<::innate_ui_haiku::menu>();
+         menu->m_screenPoint = BPoint(point.x, point.y);
+         menu->add_item("Restore", 1);
+         menu->add_item("Minimize", 2);
+         menu->add_item("Maximize", 3);
+         menu->add_separator();
+         menu->add_item("Close", 4);
+         menu->track_popup_menu(self->operating_system_window(), [self](::i32 command)
+         {
+            auto *interaction = self->user_interaction();
+            if (!interaction) return;
+            switch (command)
+            {
+            case 1: interaction->display(e_display_normal); break;
+            case 2: interaction->display(e_display_iconic); break;
+            case 3: interaction->display(e_display_zoomed); break;
+            case 4: interaction->post_message(::user::e_message_close); break;
+            }
+         });
+      });
    }
 
    void window::destroy_window()
@@ -242,14 +301,20 @@ namespace windowing_haiku
       if (auto *ui = user_interaction())
       {
          auto edisplay = ui->const_layout().sketch().display();
-         bool visible = ::is_screen_visible(edisplay);
+         bool minimized = edisplay == e_display_iconic;
+         bool visible = minimized || ::is_screen_visible(edisplay);
          if (visible != m_nativeVisible)
          {
             haiku_window_show(m_native, visible ? 1 : 0);
             m_nativeVisible = visible;
          }
+         if (minimized != m_nativeMinimized)
+         {
+            haiku_window_minimize(m_native, minimized ? 1 : 0);
+            m_nativeMinimized = minimized;
+         }
          ui->set_display(edisplay, ::user::e_layout_window);
-         if (!visible)
+         if (!visible || minimized)
             return;
       }
       ::windowing::window::draw_frame();

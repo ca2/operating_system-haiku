@@ -11,6 +11,8 @@
 #include <memory>
 #include <new>
 #include <cstring>
+#include <cmath>
+#include <algorithm>
 namespace {
 constexpr uint32 kJob='c2jb',kEvent='c2ev';
 struct job { void (*call)(void *);void *context;void (*dispose)(void *);sem_id done=-1; };
@@ -40,16 +42,45 @@ class view : public BView {
 public:
  state *owner;
  std::unique_ptr<BBitmap> bitmap;
+ double pending_wheel_y = 0;
+ uint32 pressed_buttons = 0;
  view(state *s,BRect r):BView(r,"ca2-client",B_FOLLOW_ALL,B_WILL_DRAW|B_FRAME_EVENTS|B_NAVIGABLE),owner(s){SetViewColor(245,245,245);}
  void AttachedToWindow() override {BView::AttachedToWindow();SetEventMask(B_POINTER_EVENTS,B_NO_POINTER_HISTORY);}
  void mouse_event(int kind,BPoint p){auto screen=ConvertToScreen(p);notify(owner,{kind,int(p.x),int(p.y),int(screen.x),int(screen.y)});}
- void MouseDown(BPoint p) override {Window()->Activate();MakeFocus(true);SetMouseEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS);mouse_event(4,p);}
+ void MouseDown(BPoint p) override {
+  Window()->Activate();MakeFocus(true);SetMouseEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS);
+  int32 buttons=B_PRIMARY_MOUSE_BUTTON;Window()->CurrentMessage()->FindInt32("buttons",&buttons);
+  uint32 changed=uint32(buttons)&~pressed_buttons;pressed_buttons=buttons;
+  if(changed&B_PRIMARY_MOUSE_BUTTON)mouse_event(4,p);
+  if(changed&B_SECONDARY_MOUSE_BUTTON)mouse_event(13,p);
+ }
  void MakeFocus(bool focus=true) override {bool changed=IsFocus()!=focus;BView::MakeFocus(focus);if(changed)notify(owner,{10,focus?1:0});}
  void key_event(int kind,const char *bytes,int32 count){haiku_window_event e{kind};int32 raw=0,key=0;auto *m=Window()->CurrentMessage();if(m){m->FindInt32("raw_char",&raw);m->FindInt32("key",&key);}e.x=raw;e.y=key;e.width=modifiers();if(bytes&&count>0)memcpy(e.text,bytes,size_t(count)<sizeof(e.text)-1?size_t(count):sizeof(e.text)-1);notify(owner,e);}
  void KeyDown(const char *bytes,int32 count) override {key_event(8,bytes,count);}
  void KeyUp(const char *bytes,int32 count) override {key_event(9,bytes,count);}
- void MessageReceived(BMessage *m) override {if(m->what==B_MODIFIERS_CHANGED){haiku_window_event e{11};int32 value=0;m->FindInt32("modifiers",&value);e.width=value;notify(owner,e);}else BView::MessageReceived(m);}
- void MouseUp(BPoint p) override {mouse_event(5,p);}
+ void MessageReceived(BMessage *m) override {
+  if(m->what==B_MOUSE_WHEEL_CHANGED){
+   float delta=0;
+   if(m->FindFloat("be:wheel_delta_y",&delta)!=B_OK || !std::isfinite(delta))return;
+   // Keep fractional trackpad movement until it reaches a framework wheel step.
+   pending_wheel_y+=delta;
+   int steps=int(std::clamp(pending_wheel_y,-273.0,273.0));
+   if(!steps)return;
+   pending_wheel_y-=steps;
+   BPoint point;uint32 buttons=0;GetMouse(&point,&buttons,false);
+   auto screen=ConvertToScreen(point);
+   haiku_window_event e{12,int(point.x),int(point.y),int(screen.x),int(screen.y)};
+   // Haiku uses positive for down; framework messages use positive for up.
+   e.wheel_delta=-steps*120;
+   notify(owner,e);
+  }else if(m->what==B_MODIFIERS_CHANGED){haiku_window_event e{11};int32 value=0;m->FindInt32("modifiers",&value);e.width=value;notify(owner,e);}else BView::MessageReceived(m);
+ }
+ void MouseUp(BPoint p) override {
+  int32 buttons=0;Window()->CurrentMessage()->FindInt32("buttons",&buttons);
+  uint32 released=pressed_buttons&~uint32(buttons);pressed_buttons=buttons;
+  if(released&B_PRIMARY_MOUSE_BUTTON)mouse_event(5,p);
+  if(released&B_SECONDARY_MOUSE_BUTTON)mouse_event(14,p);
+ }
  void MouseMoved(BPoint p,uint32,const BMessage *) override {mouse_event(6,p);}
  void Draw(BRect) override {if(bitmap){SetDrawingMode(B_OP_ALPHA);SetBlendingMode(B_PIXEL_ALPHA,B_ALPHA_OVERLAY);DrawBitmap(bitmap.get(),BPoint(0,0));}}
 };
@@ -84,6 +115,7 @@ extern "C" void *haiku_window_create(void *owner,void (*event)(void *,const haik
 extern "C" void haiku_window_destroy(void *p){auto *s=static_cast<state *>(p);if(!s)return;{std::lock_guard<std::mutex> guard(registry_mutex);windows.erase(s->id);}if(s->window->Lock())s->window->Quit();delete s;
  bool empty;{std::lock_guard<std::mutex> guard(registry_mutex);empty=windows.empty();}if(empty)haiku_app_quit();}
 extern "C" void haiku_window_show(void *p,int show){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){if(show){if(s->window->IsHidden())s->window->Show();}else{if(!s->window->IsHidden())s->window->Hide();}s->window->Unlock();}}
+extern "C" void haiku_window_minimize(void *p,int minimize){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->Minimize(minimize!=0);s->window->Unlock();}}
 extern "C" void haiku_window_title(void *p,const char *title){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->SetTitle(title);s->window->Unlock();}}
 extern "C" void haiku_window_frame(void *p,int x,int y,int w,int h){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->MoveTo(x,y);s->window->ResizeTo(w-1,h-1);s->window->Unlock();}}
 extern "C" void haiku_window_activate(void *p){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->Activate();s->window->Unlock();}}

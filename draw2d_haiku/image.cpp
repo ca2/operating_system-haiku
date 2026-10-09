@@ -30,6 +30,11 @@ namespace draw2d_haiku
       if (!b)
          throw ::exception(error_wrong_state);
       _tidy_map(r);
+      // Descriptor resizing does not necessarily acquire graphics again.
+      // Grow the backing bitmap before mapping, otherwise pixmap_map clips
+      // the logical image to the previous font/frame's smaller allocation.
+      if (b->size() != raw_size())
+         b->set_size(raw_size(), mode == ::image::e_map_load);
       b->read_pixels();
       auto p = create_newø<::pixmap>();
       p->m_memoryPixmap.reference_data(b->m_memoryDraw2dBitmap.data(), b->m_memoryDraw2dBitmap.size());

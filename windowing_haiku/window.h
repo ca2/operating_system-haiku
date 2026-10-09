@@ -15,6 +15,7 @@ namespace windowing_haiku
    public:
 
       window();
+      bool m_nativeMinimized = false;
 
       ~window() override;
 
@@ -22,6 +23,7 @@ namespace windowing_haiku
       bool client_to_screen(::i32_point *) override;
       bool screen_to_client(::i32_point *) override;
       void native_event(const haiku_window_event &) override;
+      void defer_show_system_menu(::user::mouse *) override;
       void destroy_window() override;
       void main_send(const ::procedure &) override;
       void main_post(const ::procedure &) override;

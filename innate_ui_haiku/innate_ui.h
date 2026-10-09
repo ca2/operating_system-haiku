@@ -1,58 +1,9 @@
-// Created by camilo on 2024-09-13 01:48 <3ThomasBorregaardSorensen!!
 #pragma once
-
-
 #include "apex/innate_ui/innate_ui.h"
-
-
-namespace innate_ui_win32
-{
-
-   
-   class window;
-
-
-   class CLASS_DECL_INNATE_UI_WIN32 innate_ui :
-      virtual public ::innate_ui::innate_ui
-   {
-   public:
-
-
-      bool m_bRunning;
-
-      HANDLE m_hthread;
-      DWORD m_dwThread;
-
-      //ATOM id();
-
-
-      string_map_base < ATOM >                    m_classmap;
-
-      innate_ui();
-      ~innate_ui() override;
-
-      void on_initialize_particle() override;
-      
-      void _defer_run_innate_ui_win32_user_loop();
-      
-      void main_post(const ::procedure & procedure) override;
-
-
-      ::pointer<::innate_ui::icon> try_get_application_icon_from_main_window() override;
-
-
-      /*void track_popup_menu(const ::function<void(::i32)> &functionOnActionId) override;*/
-
-      //virtual LRESULT _window_procedure(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-
-      //virtual void _defer_show_system_menu(HWND hwnd, const ::i32_point & pointAbsolute);
-
-
-   };
-
-   //LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-} // namespace innate_ui
-
-
-
+namespace innate_ui_haiku {
+class CLASS_DECL_INNATE_UI_HAIKU innate_ui : virtual public ::innate_ui::innate_ui {
+public:
+ void main_post(const ::procedure &) override;
+ void main_send(const ::procedure &) override;
+};
+}

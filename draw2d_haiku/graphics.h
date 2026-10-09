@@ -26,6 +26,7 @@ namespace draw2d_haiku
       using ::draw2d::graphics::_set;
       using ::draw2d::graphics::draw;
       using ::draw2d::graphics::fill;
+      using ::draw2d::graphics::fill_polygon;
 		 
  
 		BShape m_bshape;
@@ -72,6 +73,7 @@ namespace draw2d_haiku
 		bool _set(const ::f64_ellipse &) override;
 		bool _set(const ::f64_arc &) override;
 		bool _set(const ::f64_polygon_base &) override;
+		bool _set(const ::write_text::text_out &) override;
 		void prepare_path(::draw2d::path *);
 		void move_shape(double,double);
 		void _arc_shape(double l, double t, double r, double b, double start, double exten);
@@ -87,6 +89,7 @@ namespace draw2d_haiku
 		void draw_rectangle(const ::f64_rectangle &) override;
 		void draw_rectangle(const ::f64_rectangle &,::draw2d::pen *) override;
 		void fill_ellipse(const ::f64_rectangle &) override;
+      void fill_polygon(const ::f64_point *, ::collection::count) override;
 		void draw_ellipse(const ::f64_rectangle &) override;
 		void TextOutRaw(double,double,const ::scoped_string &) override;
 		::f64_size get_text_extent(const ::scoped_string &) override;

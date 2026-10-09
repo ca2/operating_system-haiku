@@ -1,99 +1,26 @@
-// Created by camilo on 2024-09-12 22:34 <3ThomasBorregaardSorensen!!
 #pragma once
-
-
 #include "apex/innate_ui/window.h"
-#define ISOLATION_AWARE_ENABLED 1
-#undef USUAL_OPERATING_SYSTEM_SUPPRESSIONS
-#include "acme/_operating_system.h"
-#include "acme/operating_system/windows/window.h"
-#include <commctrl.h>
-
-
-
-namespace innate_ui_win32
-{
-
-   class innate_ui;
-
-   class CLASS_DECL_INNATE_UI_WIN32 window :
-      virtual public ::innate_ui::window,
-      virtual public ::windows::window
-   {
-   public:
-
-
-      //HWND m_hwnd;
-      //HMENU m_hmenuSystem;
-      ::i32 m_iChildIdSeed;
-      ::i32 m_iCreateStyle;
-      //::f64 m_dFontSizeEm = 1.0;
-      //::i32 m_iFontWeight = 400;
-
-
-      window();
-      ~window() override;
-
-      void set_text(const ::scoped_string & scopedstr) override;
-
-      LONG_PTR _get_style();
-
-//      void _post(const ::procedure & procedure);
-      virtual const_char_pointer __get_class_name();
-      virtual wstring _get_class_name();
-      virtual ATOM _register_class();
-      virtual void _get_class(WNDCLASSEXW & wcex);
-      virtual void _create();
-      virtual void _create_child(window * pwindow);
-
-      void create() override;
-      void create_child(::innate_ui::window * pwindow) override;
-      void destroy_window() override;
-      void center() override;
-
-      void show() override;
-      void hide() override;
-      void show_front(::user::activation_token * puseractivationtoken)override;
-
-      void set_position(const ::i32_point & point) override;
-      void set_size(const ::i32_size & size) override;
-      void adjust_for_client_size(const ::i32_size & size) override;
-
-      ::innate_ui_win32::innate_ui * innate_ui();
-
-
-      ::operating_system::window operating_system_window() const override;
-
-      virtual ::pointer < window > _get_child_with_id(::i32 iId);
-      bool on_window_procedure(::lresult & lresult, unsigned message, ::wparam wparam, ::lparam lparam) override;
-      //virtual LRESULT _window_procedure(UINT message, WPARAM wparam, LPARAM lparam);
-
-      virtual bool _on_command();
-
-      virtual ::i32 _get_id();
-
-      void defer_show_system_menu(::user::mouse * pmouse) override;
-
-
-      HWND _create_subclassed_window(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle, ::i32 X,
-                                     ::i32 Y, ::i32 nWidth, ::i32 nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance,
-                                     LPVOID lpParam);
-
-      
-      static LRESULT CALLBACK _static_subclass_procedure(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
-                                                 UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
-
-      virtual bool _subclass_procedure(::lresult & lresult, ::u32 message, ::wparam wparam, ::lparam lparam);
-
-
-      virtual void defer_set_scaled_font();
-
-
-   };
-
-
-} // namespace innate_ui_win32
-
-
-
-
+#include <Window.h>
+#include <View.h>
+namespace innate_ui_haiku {
+class CLASS_DECL_INNATE_UI_HAIKU window : virtual public ::innate_ui::window {
+public:
+ BWindow *m_nativeWindow = nullptr;
+ BView *m_nativeView = nullptr;
+ string m_text;
+ ~window() override;
+ virtual BView *new_view();
+ void create() override;
+ void create_child(::innate_ui::window *) override;
+ void destroy_window() override;
+ void set_text(const ::scoped_string &) override;
+ void show() override;
+ void hide() override;
+ void show_front(::user::activation_token *) override;
+ void center() override;
+ void set_position(const ::i32_point &) override;
+ void set_size(const ::i32_size &) override;
+ void adjust_for_client_size(const ::i32_size &) override;
+ ::operating_system::window operating_system_window() const override;
+};
+}

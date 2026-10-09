@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-struct haiku_window_event { int kind; int x,y,width,height; char text[64] = {}; };
+struct haiku_window_event { int kind; int x,y,width,height; char text[64] = {}; int wheel_delta = 0; };
 extern "C" {
 int haiku_app_initialize(const char *signature);
 int haiku_app_is_main_thread();
@@ -10,6 +10,7 @@ int haiku_app_post(void (*call)(void *),void *context,void (*dispose)(void *),in
 void *haiku_window_create(void *owner,void (*event)(void *,const haiku_window_event *),const char *title,int x,int y,int width,int height);
 void haiku_window_destroy(void *window);
 void haiku_window_show(void *window,int show);
+void haiku_window_minimize(void *window,int minimize);
 void haiku_window_title(void *window,const char *title);
 void haiku_window_frame(void *window,int x,int y,int width,int height);
 void haiku_window_activate(void *window);

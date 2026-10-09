@@ -1,87 +1,39 @@
-// From apex/innate_ui/menu.cpp by camilo on 2026-05-19 16:52 <3ThomasBorregaardSørensen!!
 #include "platform.h"
 #include "menu.h"
-
-
-namespace innate_ui_win32
-{
-
-
-   menu::menu() 
-   {
-   
-      m_hmenuRoot = nullptr;
-
-      m_hmenu = nullptr;
-   
-   }
-
-
-   menu::~menu() {}
-
-
-   void menu::load_menu_from_resource(::i32 iMenuResourceId)
-   {
-
-      
-      m_hmenuRoot = LoadMenu(GetModuleHandle(0), MAKEINTRESOURCE(iMenuResourceId));
-
-      if (!m_hmenuRoot)
-      {
-
-         throw ::exception(error_resource);
-      }
-      m_hmenu = GetSubMenu(m_hmenuRoot, 0);
-      if (!m_hmenu)
-      {
-
-         throw ::exception(error_wrong_state);
-      }
-
-
-   }
-
-
-   void menu::set_default_menu_item_command_id(::i32 iDefaultMenuItemCommandId)
-   {
-
-      SetMenuDefaultItem(m_hmenu, iDefaultMenuItemCommandId, false);
-
-   }
-
-
-   void menu::erase_menu_item_by_command_id(::i32 iDefaultMenuItemCommandId)
-   {
-
-      RemoveMenu(m_hmenu, iDefaultMenuItemCommandId, MF_BYCOMMAND);
-
-   }
-   
-   void menu::track_popup_menu(
-      const ::operating_system::window &operatingsystemwindow, const ::function<void(::i32)> &functionOnActionId)
-   {
-         POINT pos;
-
-         if (!GetCursorPos(&pos))
-         {
-            pos.x = pos.y = 0;
-         }
-
-
-         HWND hwnd = ::as_HWND(operatingsystemwindow);
-
-         /// SetForegroundWindow(operating_system_window());
-         ///
-         /// 
-         
-         ::SetForegroundWindow(hwnd);
-
-         ::i32 action = TrackPopupMenu(m_hmenu, TPM_NONOTIFY | TPM_RETURNCMD | TPM_RIGHTBUTTON, pos.x, pos.y, 0,
-                                     hwnd, NULL);
-
-         functionOnActionId(action);
-    
-   }
-
-
-} // namespace innate_ui
+#include "acme_windowing_haiku/native.h"
+#include <MenuItem.h>
+#include <Message.h>
+namespace innate_ui_haiku {
+menu::menu() : m_menu(new BPopUpMenu("Window", false, false)) {
+ int x=0,y=0;haiku_mouse_position(&x,&y);m_screenPoint=BPoint(x,y);
+}
+menu::~menu() { delete m_menu; }
+void menu::add_item(const ::scoped_string &text, int id) {
+ ::string label(text);
+ auto *message=new BMessage('c2mi');message->AddInt32("command",id);
+ m_menu->AddItem(new BMenuItem(label.c_str(),message));
+}
+void menu::add_separator() { m_menu->AddSeparatorItem(); }
+void menu::set_default_menu_item_command_id(::i32 id) {
+ for(int32 i=0;i<m_menu->CountItems();++i) {
+  auto *item=m_menu->ItemAt(i);int32 command=0;
+  if(item->Message() && item->Message()->FindInt32("command",&command)==B_OK)
+   item->SetMarked(command==id);
+ }
+}
+void menu::erase_menu_item_by_command_id(::i32 id) {
+ for(int32 i=0;i<m_menu->CountItems();++i) {
+  auto *item=m_menu->ItemAt(i);int32 command=0;
+  if(item->Message() && item->Message()->FindInt32("command",&command)==B_OK && command==id) {
+   m_menu->RemoveItem(item);delete item;return;
+  }
+ }
+}
+void menu::track_popup_menu(const ::operating_system::window &, const ::function<void(::i32)> &callback) {
+ // Synchronous Go returns the selection; messages are handled by the framework callback.
+ auto *item=m_menu->Go(m_screenPoint,false,false,false);
+ int32 command=0;
+ if(item && item->Message() && item->Message()->FindInt32("command",&command)==B_OK)
+  callback(command);
+}
+}
