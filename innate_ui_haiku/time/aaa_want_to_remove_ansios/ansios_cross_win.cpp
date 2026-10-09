@@ -1,0 +1,61 @@
+#include "platform.h"
+
+
+#if 0
+
+
+::u32
+WINAPI
+FormatMessage(
+              ::u32 dwFlags,
+              const void * lpSource,
+              ::u32 dwMessageId,
+              ::u32 dwLanguageId,
+              ::i8 * lpBuffer,
+              ::u32 nSize,
+              va_list *Arguments
+              )
+{
+
+
+    return 0;
+
+
+}
+
+
+VOID
+WINAPI
+output_debug_string(
+                   const ::i8 * lpOutputString
+                   )
+{
+
+
+    fprintf(stderr, "%s", lpOutputString);
+    fflush(stderr);
+    //printf("%s", lpOutputString);
+
+
+}
+
+
+
+
+VOID
+WINAPI
+output_debug_string(
+                   const ::wide_character * lpOutputString
+                   )
+{
+
+
+    output_debug_string(string(lpOutputString));
+
+
+}
+
+
+#endif
+
+
