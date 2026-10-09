@@ -30,6 +30,10 @@ namespace windowing_haiku
       void set_position(const ::i32_point &) override;
       void set_size(const ::i32_size &) override;
       void set_active_window() override;
+      using ::windowing::window::set_keyboard_focus;
+      void set_keyboard_focus() override;
+      void _set_keyboard_focus_unlocked() override;
+      bool has_keyboard_focus() override;
       ::operating_system::window operating_system_window() const override;
       bool is_active_window() override { return haiku_window_is_active(m_native) != 0; }
       bool is_window() override { return m_native != nullptr; }

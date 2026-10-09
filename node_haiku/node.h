@@ -26,6 +26,7 @@ namespace node_haiku
 
 
       void initialize(::particle * pparticle) override;
+      string font_name(enum_font efont) override;
 
 
       string get_user_name();

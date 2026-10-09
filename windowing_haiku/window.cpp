@@ -11,6 +11,9 @@
 #include "aura/graphics/image/image_pixmap_lease.h"
 #include "acme/parallelization/synchronous_lock.h"
 #include "acme/platform/system.h"
+#include "aura/message/user.h"
+#include "aura/platform/session.h"
+#include <InterfaceDefs.h>
 
 namespace windowing_haiku
 {
@@ -62,6 +65,81 @@ namespace windowing_haiku
 
    void window::native_event(const haiku_window_event &e)
    {
+      if (e.kind == 8 || e.kind == 9 || e.kind == 11)
+      {
+         if (auto *ui = user_interaction())
+         {
+            ::pointer<window> self = this;
+            ui->post([self,e]()
+            {
+               auto *interaction = self->user_interaction();
+               if (!interaction) return;
+               auto session = interaction->session();
+               session->set_key_pressed(::user::e_key_shift, (e.width & B_SHIFT_KEY) != 0);
+               session->set_key_pressed(::user::e_key_control, (e.width & (B_CONTROL_KEY | B_COMMAND_KEY)) != 0);
+               session->set_key_pressed(::user::e_key_alt, (e.width & B_OPTION_KEY) != 0);
+               if (e.kind == 11) return;
+               ::user::e_key key = ::user::e_key_none;
+               switch (e.x)
+               {
+               case B_BACKSPACE: key = ::user::e_key_back; break;
+               case B_DELETE: key = ::user::e_key_delete; break;
+               case B_LEFT_ARROW: key = ::user::e_key_left; break;
+               case B_RIGHT_ARROW: key = ::user::e_key_right; break;
+               case B_UP_ARROW: key = ::user::e_key_up; break;
+               case B_DOWN_ARROW: key = ::user::e_key_down; break;
+               case B_HOME: key = ::user::e_key_home; break;
+               case B_END: key = ::user::e_key_end; break;
+               case B_PAGE_UP: key = ::user::e_key_page_up; break;
+               case B_PAGE_DOWN: key = ::user::e_key_page_down; break;
+               case B_ENTER: key = ::user::e_key_return; break;
+               case B_TAB: key = ::user::e_key_tab; break;
+               case B_ESCAPE: key = ::user::e_key_escape; break;
+               case B_SPACE: key = ::user::e_key_space; break;
+               default:
+                  if (e.x >= 'a' && e.x <= 'z') key = ::user::e_key_a + (e.x - 'a');
+                  else if (e.x >= '0' && e.x <= '9') key = ::user::e_key_0 + (e.x - '0');
+                  break;
+               }
+               auto message = self->create_newø<::message::key>();
+               message->m_eusermessage = e.kind == 8 ? ::user::e_message_key_down : ::user::e_message_key_up;
+               message->m_operatingsystemwindow = self->operating_system_window();
+               message->m_pwindow = self;
+               message->m_ekey = key;
+               message->m_nChar = e.x;
+               message->m_nScanCode = e.y;
+               message->m_strText = e.text;
+               interaction->send_message(message);
+               if (e.kind == 8 && (unsigned char)e.text[0] >= 32 && e.x != B_DELETE
+                  && !(e.width & (B_CONTROL_KEY | B_COMMAND_KEY | B_OPTION_KEY)))
+               {
+                  auto character = self->create_newø<::message::key>();
+                  character->m_eusermessage = ::user::e_message_char;
+                  character->m_operatingsystemwindow = self->operating_system_window();
+                  character->m_pwindow = self;
+                  character->m_ekey = ::user::e_key_refer_to_text_member;
+                  character->m_strText = e.text;
+                  interaction->send_message(character);
+               }
+            });
+         }
+         return;
+      }
+      if (e.kind == 10)
+      {
+         if (auto *ui = user_interaction())
+         {
+            ::pointer<window> self = this;
+            ui->post([self,e]()
+            {
+               if (e.x) self->window_on_set_keyboard_focus();
+               else self->window_on_kill_keyboard_focus();
+               if (auto *interaction = self->user_interaction())
+                  interaction->send_message(e.x ? ::user::e_message_set_focus : ::user::e_message_kill_focus);
+            });
+         }
+         return;
+      }
       if (e.kind == 7)
       {
          if (auto *ui = user_interaction())
@@ -131,6 +209,14 @@ namespace windowing_haiku
    void window::set_position(const ::i32_point &p) { ::haiku::acme::windowing::window::set_position(p); }
    void window::set_size(const ::i32_size &p) { ::haiku::acme::windowing::window::set_size(p); }
    void window::set_active_window() { ::haiku::acme::windowing::window::set_active_window(); }
+   void window::set_keyboard_focus() { _set_keyboard_focus_unlocked(); }
+   void window::_set_keyboard_focus_unlocked()
+   {
+      haiku_window_focus(m_native);
+      window_on_set_keyboard_focus();
+      if (auto *ui = user_interaction()) ui->send_message(::user::e_message_set_focus);
+   }
+   bool window::has_keyboard_focus() { return haiku_window_has_focus(m_native) != 0; }
 
    ::operating_system::window window::operating_system_window() const
    {

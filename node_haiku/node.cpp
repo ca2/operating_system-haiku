@@ -46,6 +46,28 @@ namespace node_haiku
 
    }
 
+   string node::font_name(enum_font efont)
+   {
+      switch (efont)
+      {
+      case e_font_sans_ex:
+      case e_font_sans_fx:
+         return "Noto Sans Display";
+      case e_font_sans:
+      case e_font_sans_ui:
+         return "Noto Sans";
+      case e_font_serif:
+      case e_font_serif_ex:
+      case e_font_serif_fx:
+      case e_font_serif_ui:
+         return "Noto Serif";
+      case e_font_monospace:
+         return "Noto Sans Mono";
+      default:
+         return ::aura_haiku::node::font_name(efont);
+      }
+   }
+
 
 //      bool node::_os_calc_app_dark_mode()
 //      {

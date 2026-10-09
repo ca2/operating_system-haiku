@@ -539,6 +539,35 @@ namespace draw2d_haiku
          else
             view->StrokeShape(&m_bshape, gradient);
       }
+      else if (brush->m_ebrush == ::draw2d::e_brush_pattern && pbrush)
+      {
+         if (!brush->m_pimage)
+            return;
+         auto source = brush->m_pimage->get_bitmap_as_source(this);
+         auto *native = dynamic_cast<bitmap *>(source.m_p);
+         if (!native || !native->m_pbbitmap)
+            throw ::exception(error_wrong_state);
+         BBitmap tile(native->m_pbbitmap->Bounds(), B_RGBA32);
+         if (tile.InitCheck() != B_OK)
+            throw ::exception(error_failed);
+         {
+            graphics_lock sourceLock(native);
+            memory_copy(tile.Bits(), native->m_pbbitmap->Bits(), tile.BitsLength());
+         }
+         double width = brush->m_size.cx > 0 ? brush->m_size.cx : tile.Bounds().Width() + 1;
+         double height = brush->m_size.cy > 0 ? brush->m_size.cy : tile.Bounds().Height() + 1;
+         auto bounds = m_bshape.Bounds();
+         auto transform = view->Transform();
+         view->SetTransform(BAffineTransform());
+         view->PushState();
+         view->SetTransform(transform);
+         view->ClipToShape(&m_bshape);
+         for (double y = std::floor(bounds.top / height) * height; y <= bounds.bottom; y += height)
+            for (double x = std::floor(bounds.left / width) * width; x <= bounds.right; x += width)
+               view->DrawBitmap(&tile, tile.Bounds(), BRect(x, y, x + width - 1, y + height - 1));
+         view->PopState();
+         view->SetTransform(transform);
+      }
       else if (brush->m_ebrush == ::draw2d::e_brush_box_gradient && pbrush)
       {
          auto bounds = m_bshape.Bounds();

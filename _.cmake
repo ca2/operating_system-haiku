@@ -28,15 +28,6 @@ endif()
 
 add_compile_definitions(__HAIKU__)
 
-set(default_write_text write_text_haiku)
-set(default_draw2d draw2d_haiku)
-set(default_node node_haiku)
-set(default_acme_windowing acme_windowing_haiku)
-set(default_windowing windowing_haiku)
-list(APPEND app_common_dependencies operating_ambient_haiku windowing_haiku acme_windowing_haiku nano_http_command_line nano_compress_command_line nano_graphics_cairo)
-set(default_imaging imaging_freeimage)
-set(default_networking networking_bsd)
-set(default_audio audio_sunaudio CACHE STRING "SunOS audio backend")
 # Alternative default (both modules are built):
 # set(default_audio audio_oss CACHE STRING "SunOS audio backend" FORCE)
 set_property(CACHE default_audio PROPERTY STRINGS audio_sunaudio audio_oss)
@@ -115,6 +106,74 @@ endif()
 
 # Haiku uses app_server and the Interface Kit rather than an XDG desktop.
 set(DESKTOP_ENVIRONMENT_NAME "haiku")
+
+
+
+include("operating_system/operating_system-posix/_desktop_ambient_1.cmake")
+
+
+
+set(default_write_text write_text_haiku)
+set(default_draw2d draw2d_haiku)
+set(default_node node_haiku)
+set(default_acme_windowing acme_windowing_haiku)
+set(default_windowing windowing_haiku)
+set(default_imaging imaging_freeimage)
+set(default_networking networking_bsd)
+set(default_audio audio_sunaudio CACHE STRING "SunOS audio backend")
+set(default_nano_graphics nano_graphics_cairo)
+
+
+
+list(APPEND acme_libraries
+        acme
+        acme_posix
+        acme_haiku)
+
+
+list(APPEND static_acme_libraries
+        static_acme
+        static_acme_posix
+        static_acme_haiku)
+
+
+list(APPEND apex_libraries
+        ${acme_libraries}
+        apex
+        apex_posix
+        apex_haiku
+)
+
+list(APPEND aura_libraries
+        ${apex_libraries}
+        aura
+        aura_posix
+        aura_haiku
+        node_haiku
+)
+
+
+if(${DESKTOP_AMBIENT})
+
+   list(APPEND app_common_dependencies
+           operating_ambient_haiku
+           windowing_haiku
+           acme_windowing_haiku
+           nano_graphics_cairo
+           ${aura_libraries})
+
+else()
+
+   list(APPEND app_common_dependencies
+           nano_http_command_line
+           nano_compress_command_line)
+
+endif()
+
+
+
+include("operating_system/operating_system-posix/_desktop_ambient_2.cmake")
+
 
 #set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/time-${OPERATING_SYSTEM_NAME}/x64/basis)
 set(LIBRARY_OUTPUT_PATH "${CMAKE_CURRENT_BINARY_DIR}/output")

@@ -5,7 +5,7 @@
 #include "text_composition_client.h"
 
 
-namespace windowing_gtk3
+namespace windowing_haiku
 {
 
 
@@ -23,7 +23,7 @@ namespace windowing_gtk3
    }
 
 
-} // namespace windowing_gtk3
+} // namespace windowing_haiku
 
 
 

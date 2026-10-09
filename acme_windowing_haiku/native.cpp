@@ -40,10 +40,15 @@ class view : public BView {
 public:
  state *owner;
  std::unique_ptr<BBitmap> bitmap;
- view(state *s,BRect r):BView(r,"ca2-client",B_FOLLOW_ALL,B_WILL_DRAW|B_FRAME_EVENTS),owner(s){SetViewColor(245,245,245);}
+ view(state *s,BRect r):BView(r,"ca2-client",B_FOLLOW_ALL,B_WILL_DRAW|B_FRAME_EVENTS|B_NAVIGABLE),owner(s){SetViewColor(245,245,245);}
  void AttachedToWindow() override {BView::AttachedToWindow();SetEventMask(B_POINTER_EVENTS,B_NO_POINTER_HISTORY);}
  void mouse_event(int kind,BPoint p){auto screen=ConvertToScreen(p);notify(owner,{kind,int(p.x),int(p.y),int(screen.x),int(screen.y)});}
- void MouseDown(BPoint p) override {SetMouseEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS);mouse_event(4,p);}
+ void MouseDown(BPoint p) override {Window()->Activate();MakeFocus(true);SetMouseEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS);mouse_event(4,p);}
+ void MakeFocus(bool focus=true) override {bool changed=IsFocus()!=focus;BView::MakeFocus(focus);if(changed)notify(owner,{10,focus?1:0});}
+ void key_event(int kind,const char *bytes,int32 count){haiku_window_event e{kind};int32 raw=0,key=0;auto *m=Window()->CurrentMessage();if(m){m->FindInt32("raw_char",&raw);m->FindInt32("key",&key);}e.x=raw;e.y=key;e.width=modifiers();if(bytes&&count>0)memcpy(e.text,bytes,size_t(count)<sizeof(e.text)-1?size_t(count):sizeof(e.text)-1);notify(owner,e);}
+ void KeyDown(const char *bytes,int32 count) override {key_event(8,bytes,count);}
+ void KeyUp(const char *bytes,int32 count) override {key_event(9,bytes,count);}
+ void MessageReceived(BMessage *m) override {if(m->what==B_MODIFIERS_CHANGED){haiku_window_event e{11};int32 value=0;m->FindInt32("modifiers",&value);e.width=value;notify(owner,e);}else BView::MessageReceived(m);}
  void MouseUp(BPoint p) override {mouse_event(5,p);}
  void MouseMoved(BPoint p,uint32,const BMessage *) override {mouse_event(6,p);}
  void Draw(BRect) override {if(bitmap){SetDrawingMode(B_OP_ALPHA);SetBlendingMode(B_PIXEL_ALPHA,B_ALPHA_OVERLAY);DrawBitmap(bitmap.get(),BPoint(0,0));}}
@@ -51,7 +56,7 @@ public:
 class window : public BWindow {
 public:
  state *owner;view *client;
- window(state *s,const char *title,int x,int y,int w,int h):BWindow(BRect(x,y,x+w-1,y+h-1),title,B_NO_BORDER_WINDOW_LOOK,B_NORMAL_WINDOW_FEEL,0),owner(s),client(new view(s,Bounds())){AddChild(client);}
+ window(state *s,const char *title,int x,int y,int w,int h):BWindow(BRect(x,y,x+w-1,y+h-1),title,B_NO_BORDER_WINDOW_LOOK,B_NORMAL_WINDOW_FEEL,B_WILL_ACCEPT_FIRST_CLICK),owner(s),client(new view(s,Bounds())){AddChild(client);client->MakeFocus(true);}
  void WindowActivated(bool active) override {BWindow::WindowActivated(active);notify(owner,{7,active?1:0});}
  bool QuitRequested() override {notify(owner,{3});return false;}
  void FrameResized(float w,float h) override {notify(owner,{1,0,0,int(w)+1,int(h)+1});client->Invalidate();}
@@ -82,6 +87,8 @@ extern "C" void haiku_window_show(void *p,int show){auto *s=static_cast<state *>
 extern "C" void haiku_window_title(void *p,const char *title){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->SetTitle(title);s->window->Unlock();}}
 extern "C" void haiku_window_frame(void *p,int x,int y,int w,int h){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->MoveTo(x,y);s->window->ResizeTo(w-1,h-1);s->window->Unlock();}}
 extern "C" void haiku_window_activate(void *p){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->Activate();s->window->Unlock();}}
+extern "C" void haiku_window_focus(void *p){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){s->window->Activate();static_cast<window *>(s->window)->client->MakeFocus(true);s->window->Unlock();}}
+extern "C" int haiku_window_has_focus(void *p){auto *s=static_cast<state *>(p);if(!s||!s->window->Lock())return 0;bool focus=s->window->IsActive()&&static_cast<window *>(s->window)->client->IsFocus();s->window->Unlock();return focus?1:0;}
 extern "C" void haiku_window_bounds(void *p,int *x,int *y,int *w,int *h){auto *s=static_cast<state *>(p);if(s && s->window->Lock()){auto f=s->window->Frame();*x=int(f.left);*y=int(f.top);*w=f.IntegerWidth()+1;*h=f.IntegerHeight()+1;s->window->Unlock();}}
 extern "C" void haiku_window_present(void *p,const void *data,int w,int h,int stride){
  auto *s=static_cast<state *>(p);if(!s || !data || w<=0 || h<=0 || stride<w*4)return;

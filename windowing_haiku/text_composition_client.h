@@ -7,11 +7,11 @@
 #include "aura/user/user/text_composition_client.h"
 
 
-namespace windowing_gtk3
+namespace windowing_haiku
 {
 
 
-   class CLASS_DECL_WINDOWING_GTK3 text_composition_client :
+   class CLASS_DECL_WINDOWING_HAIKU text_composition_client :
       virtual public ::user::text_composition_client
    {
    public:
@@ -25,7 +25,7 @@ namespace windowing_gtk3
    };
 
 
-} // namespace windowing_gtk3
+} // namespace windowing_haiku
 
 
 
