@@ -1,403 +1,224 @@
-//
-// Created by camilo on 31/01/2022.
-//
 #include "platform.h"
 #include "context.h"
-#include "brush.h"
-#include "font.h"
-#include "icon.h"
-#include "pen.h"
-#include "acme/prototype/geometry2d/size.h"
+#include "acme/nano/graphics/font_family.h"
 #include "acme/prototype/geometry2d/rectangle.h"
-////#include "acme/exception/exception.h"
-#pragma comment(lib, "Msimg32.lib")
-#include <gdiplus.h>
-
-
-::i32 align_to_windows_draw_text_align(const ::e_align & ealign);
-
-::i32 draw_text_to_windows_draw_text(const ::e_draw_text & edrawtext);
-
-
-      namespace nano_graphics_gdi
-      {
-
-
-         context::context()
-         {
-
-            m_hdc = ::CreateCompatibleDC(nullptr);
-            m_bDelete = true;
-
-         }
-
-
-
-
-         context::~context()
-         {
-
-            if (m_bDelete)
-            {
-
-               ::DeleteDC(m_hdc);
-
-            }
-
-         }
-
-
-         void context::attach(void * posdata, const ::i32_size & size, int iType)
-         {
-
-             if (iType == 0) {
-                 auto hdc = (HDC)posdata;
-
-                 m_hdc = hdc;
-                 m_bDelete = false;
-
-                 m_size = size;
-             }
-             else {
-
-                 throw ::exception(error_wrong_type);
-
-             }
-
-
-         }
-
-         
-HFONT CreateSimpleFont16(void)
-         {
-            // Negative height means character height in pixels
-            return CreateFontA(-16, // height ≈ 16 px
-                               0, // width (auto)
-                               0, // escapement
-                               0, // orientation
-                               FW_NORMAL, // weight
-                               FALSE, // italic
-                               FALSE, // underline
-                               FALSE, // strikeout
-                               DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                               DEFAULT_PITCH | FF_DONTCARE, "Segoe UI");
-         }
-
-
-         void context::_draw_text(const ::scoped_string &scopedstr, const ::f64_rectangle &rectangleText,
-                                  const ::e_draw_text &edrawtext, const ::e_align &ealign)
-         {
-
-            //COLORREF colorrefBackgroundColor = win32_COLORREF(pnanobrushBack->m_color);
-
-            //SetBkColor(m_hdc, colorrefBackgroundColor);
-
-            ::SetBkMode(m_hdc, TRANSPARENT);
-
-            COLORREF colorrefTextColor = win32_COLORREF(m_pnanographicsgdibrush->m_color);
-
-            SetTextColor(m_hdc, colorrefTextColor);
-            //SetTextColor(m_hdc, RGB(100, 100, 255));
-
-            SetBkMode(m_hdc, OPAQUE);
-
-            wstring wstrMessage(scopedstr);
-
-            //pnanofont->update(this);
-
-            auto hfont = (HFONT)m_pnanographicsgdifont->m_hgdiobj;
-
-            //auto hfont2 = CreateSimpleFont16();
-
-            //auto h3 = ::SelectObject(m_hdc, hfont2);
-
-            auto h3 = ::SelectObject(m_hdc, hfont);
-
-
-            LOGFONTW lf{};
-
-            ::GetObject(hfont, sizeof(lf), &lf);
-
-            TEXTMETRICW textmetricw = {};
-
-            ::GetTextMetrics(m_hdc, &textmetricw);
-
-            ::i32 iAlign = align_to_windows_draw_text_align(ealign);
-
-            ::i32 iFlag = draw_text_to_windows_draw_text(edrawtext);
-
-            //iAlign = 0;
-
-            //iFlag = 0;
-
-            RECT r;
-
-            ::copy(r, rectangleText);
-
-            //InflateRect(&r, 16, 16);
-
-            
-            auto pszMessage = wstrMessage.c_str();
-
-            //            if (scopedstr.contains("Operating"))
-            //{
-
-            //   information("Operating");
-
-            //   //r.left = 0;
-            //   //r.top = 0;
-            //   //r.right = 400;
-            //   //r.bottom = 30;
-
-            //   wstrMessage = "test";
-            //   // return;
-            //}
-            
-            ::i32 iLength = (::i32) wstrMessage.length();
-
-            //auto pdraw2dbrush = createø<::nano::graphics::brush>();
-
-            //pdraw2dbrush->m_color = ::color::yellow;
-
-            //auto pdraw2dpen = createø<::nano::graphics::pen>();
-
-            //pdraw2dpen->m_color = ::color::magenta;
-
-            //rectangle(r, nullptr, pdraw2dpen);
-
-            ::DrawTextW(m_hdc, wstrMessage, (::i32)iLength, (LPRECT)&r, iAlign | iFlag);
-
-            //::SelectObject(m_hdc, h3);
-
-            //::DeleteObject(hfont2);
-
-         }
-
-
-         ::f64_size context::get_text_extents(const ::scoped_string & scopedstr)
-         {
-
-            //pnanofont->update(this);
-            auto hfont = (HFONT) m_pnanographicsgdifont->m_hgdiobj;
-
-            ::SelectObject(m_hdc, hfont);
-
-            wstring wstr(scopedstr);
-
-            ::SIZE size;
-
-            if (!::GetTextExtentPoint32W(m_hdc, wstr, (::i32)wstr.length(), &size))
-            {
-
-               throw ::exception(error_failed);
-
-            }
-
-            return { size.cx, size.cy };
-
-         }
-
-
-         void context::rectangle(const ::f64_rectangle& rectangle)
-         {
-
-            if (!m_pnanographicsgdibrush && !m_pnanographicsgdipen)
-            {
-
-               return;
-
-            }
-
-            if (m_pnanographicsgdibrush)
-            {
-
-               //pnanobrush->update(this);
-
-               ::SelectObject(m_hdc, (HGDIOBJ)m_pnanographicsgdibrush->m_hgdiobj);
-            }
-            else
-            {
-
-               ::SelectObject(m_hdc, (HGDIOBJ)::GetStockObject(NULL_BRUSH));
-
-            }
-
-            if (m_pnanographicsgdipen)
-            {
-
-               //pnanopen->update(this);
-
-               ::SelectObject(m_hdc, (HGDIOBJ)m_pnanographicsgdipen->m_hgdiobj);
-            }
-            else
-            {
-
-               ::SelectObject(m_hdc, (HGDIOBJ)::GetStockObject(NULL_PEN));
-
-            }
-
-
-            auto r = rectangle;
-
-            if (m_pnanographicsgdipen)
-            {
-
-               r.left += m_pnanographicsgdipen->m_fWidth - 1;
-               r.top += m_pnanographicsgdipen->m_fWidth - 1;
-            }
-
-            ::Rectangle(m_hdc,
-               (int)r.left,
-               (int)r.top,
-               (int)r.right,
-               (int)r.bottom);
-
-
-         }
-
-
-         void context::draw_icon(::f64 x, ::f64 y, ::f64 cx, ::f64 cy, ::nano::graphics::icon *picon)
-         {
-
-
-
-            ::pointer < ::nano_graphics_gdi::icon > pwindowsicon = picon;
-
-            Gdiplus::Graphics g(m_hdc);
-
-            Gdiplus::Rect r;
-
-            r.X = (INT) x;
-            r.Y = (INT)y;
-            r.Width = (INT)cx;
-            r.Height = (INT)cy;
-
-            g.DrawImage(pwindowsicon->m_pimage, r);
-            //)
-
-            //HDC hdcMem = ::CreateCompatibleDC(m_hdc);
-
-            //HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcMem, pwindowsicon->m_hgdiobj);
-
-            //// Step 3: Use BitBlt to copy the bitmap from the memory DC to the destination DC
-            //    // Set up the BLENDFUNCTION structure for alpha blending
-            //BLENDFUNCTION blendFunction;
-            //blendFunction.BlendOp = AC_SRC_OVER;
-            //blendFunction.BlendFlags = 0;
-            //blendFunction.SourceConstantAlpha = 255;  // Use full opacity
-            //blendFunction.AlphaFormat = AC_SRC_ALPHA; // The source bitmap has an alpha channel
-
-            //// Step 3: Use AlphaBlend to copy the bitmap from the memory DC to the destination DC
-            //AlphaBlend(m_hdc, x, y, cx, cy, hdcMem, 0, 0, cx, cy, blendFunction);
-
-
-            //// Step 4: Restore the old bitmap in the memory DC
-            //SelectObject(hdcMem, hOldBitmap);
-
-            //::DeleteDC(hdcMem);
-
-         }
-
-
-         void context::translate(::f64 x, ::f64 y)
-         {
-
-            OffsetViewportOrgEx(m_hdc, (::i32) x, (::i32)y, nullptr);
-
-         }
-
-
-      } // namespace nano_graphics_gdi
-
-
-
-
-
-::i32 align_to_windows_draw_text_align(const ::e_align & ealign)
-{
-
-   ::i32 iAlign = 0;
-
-   if (ealign & e_align_right)
-   {
-
-      iAlign |= DT_RIGHT;
-
-   }
-   else if (ealign & e_align_horizontal_center)
-   {
-
-      iAlign |= DT_CENTER;
-
-   }
-   else
-   {
-
-      iAlign |= DT_LEFT;
-
-   }
-
-
-   if (ealign & e_align_bottom)
-   {
-
-      iAlign |= DT_BOTTOM;
-
-   }
-   else if (ealign & e_align_vertical_center)
-   {
-
-      iAlign |= DT_VCENTER;
-
-   }
-   else
-   {
-
-      iAlign |= DT_TOP;
-
-   }
-
-   return iAlign;
-
+#include "icon.h"
+#include <DataIO.h>
+#include <TranslationUtils.h>
+#include <Region.h>
+namespace nano_graphics_haiku {
+static rgb_color native_color(const ::color::color &c) {
+  return {c.u8_red(), c.u8_green(), c.u8_blue(), c.u8_opacity()};
 }
-
-
-
-::i32 draw_text_to_windows_draw_text(const ::e_draw_text & edrawtext)
-{
-
-   ::i32 iFlag = 0;
-
-   if (edrawtext & e_draw_text_end_ellipsis)
-   {
-
-      iFlag |= DT_END_ELLIPSIS;
-
-   }
-
-   if (edrawtext & e_draw_text_expand_tabs)
-   {
-
-      iFlag |= DT_EXPANDTABS;
-
-   }
-
-   if (edrawtext & e_draw_text_single_line)
-   {
-
-      iFlag |= DT_SINGLELINE;
-
-   }
-
-   if (edrawtext & e_draw_text_word_break)
-   {
-
-      iFlag |= DT_WORDBREAK;
-
-   }
-
-   return iFlag;
-
+static BRect native_rect(const ::f64_rectangle &r) {
+  return BRect(r.left, r.top, r.right - 1, r.bottom - 1);
 }
-
-
+context::~context() {
+  if (m_bitmap) {
+    m_bitmap->Unlock();
+    delete m_bitmap;
+  }
+}
+void context::create(const ::i32_size &s) {
+  if (m_bitmap) {
+    m_bitmap->Unlock();
+    delete m_bitmap;
+  }
+  m_bitmap = new BBitmap(BRect(0, 0, s.cx - 1, s.cy - 1),
+                         B_BITMAP_ACCEPTS_VIEWS, B_RGBA32);
+  if (m_bitmap->InitCheck() != B_OK)
+    throw ::exception(error_failed, "Cannot create Haiku nano bitmap");
+  m_view = new BView(m_bitmap->Bounds(), "nano", B_FOLLOW_NONE, B_WILL_DRAW);
+  m_bitmap->AddChild(m_view);
+  m_bitmap->Lock();
+  m_size = s;
+}
+void context::attach(void *d, const ::i32_size &s, int) {
+  m_view = static_cast<BView *>(d);
+  m_size = s;
+}
+void *context::detach(int) {
+  auto *v = m_view;
+  m_view = nullptr;
+  return v;
+}
+void context::set_brush(::nano::graphics::brush *b) { m_brush = b; }
+void context::set_pen(::nano::graphics::pen *p) { m_pen = p; }
+void context::set_font(::nano::graphics::font *f) {
+  m_font = f;
+  if (!m_view)
+    return;
+  auto font = native_font();
+  m_view->SetFont(&font);
+}
+void context::set_blend_mode(::nano::graphics::enum_blend_mode) {
+  if (m_view) {
+    m_view->SetDrawingMode(B_OP_ALPHA);
+    m_view->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_OVERLAY);
+  }
+}
+void context::set_smoothing_mode(::nano::graphics::enum_smoothing_mode) {}
+void context::set_text_rendering_hint(
+    ::nano::graphics::enum_text_rendering_hint) {}
+void context::clear(const ::color::color &c) {
+  if (m_view) {
+    m_view->SetHighColor(native_color(c));
+    m_view->FillRect(m_view->Bounds());
+  }
+}
+void context::rectangle(const ::f64_rectangle &r) {
+  if (!m_view)
+    return;
+  if (m_brush) {
+    m_view->SetHighColor(native_color(m_brush->m_color));
+    m_view->FillRect(native_rect(r));
+  }
+  if (m_pen) {
+    m_view->SetHighColor(native_color(m_pen->m_color));
+    m_view->SetPenSize(m_pen->m_fWidth);
+    m_view->StrokeRect(native_rect(r));
+  }
+}
+void context::ellipse(const ::f64_rectangle &r) {
+  if (!m_view)
+    return;
+  if (m_brush) {
+    m_view->SetHighColor(native_color(m_brush->m_color));
+    m_view->FillEllipse(native_rect(r));
+  }
+  if (m_pen) {
+    m_view->SetHighColor(native_color(m_pen->m_color));
+    m_view->SetPenSize(m_pen->m_fWidth);
+    m_view->StrokeEllipse(native_rect(r));
+  }
+}
+void context::line(const ::f64_point &a, const ::f64_point &b) {
+  if (m_view && m_pen) {
+    m_view->SetHighColor(native_color(m_pen->m_color));
+    m_view->SetPenSize(m_pen->m_fWidth);
+    m_view->StrokeLine(BPoint(a.x, a.y), BPoint(b.x, b.y));
+  }
+}
+void context::translate(double x, double y) {
+  if (m_view)
+    m_view->SetOrigin(m_view->Origin() + BPoint(x, y));
+}
+BFont context::native_font() const {
+  BFont font;
+  if (m_view)
+    m_view->GetFont(&font);
+  else
+    font = *be_plain_font;
+  if (m_font) {
+    if (m_font->m_pfontfamily) {
+      auto family = m_font->m_pfontfamily->m_strFamilyName;
+      if (family.has_character()) font.SetFamilyAndStyle(family.c_str(), nullptr);
+      else if (m_font->m_pfontfamily->m_efont == e_font_monospace) font = *be_fixed_font;
+    }
+    font.SetFace((m_font->m_bBold ? B_BOLD_FACE : 0) | (m_font->m_bItalic ? B_ITALIC_FACE : 0));
+    font.SetSize(m_font->m_fFontSize);
+  }
+  return font;
+}
+::f64_size context::get_text_extents(const ::scoped_string &t) {
+  ::string text(t);
+  auto font = native_font();
+  font_height h;
+  font.GetHeight(&h);
+  return {font.StringWidth(text.c_str()), h.ascent + h.descent + h.leading};
+}
+void context::draw_text123(const ::scoped_string &t, const ::f64_rectangle &r,
+                          const ::e_draw_text &draw, const ::e_align &align) {
+  if (!m_view || r.width() <= 0 || r.height() <= 0) return;
+  ::string text(t);
+  ::string_array_base lines;
+  if (draw & e_draw_text_single_line) {
+    text.replace_with(" ", "\r");
+    text.replace_with(" ", "\n");
+    lines.add(text);
+  } else {
+    character_count paragraphStart = 0;
+    while (paragraphStart <= text.length()) {
+      auto paragraphEnd = paragraphStart;
+      while (paragraphEnd < text.length() && text[paragraphEnd] != '\n') ++paragraphEnd;
+      ::string paragraph = text.substr(paragraphStart, paragraphEnd - paragraphStart);
+      paragraph.ends_eat("\r");
+      if (!(draw & e_draw_text_word_break) || paragraph.is_empty()) lines.add(paragraph);
+      else {
+        character_count start = 0;
+        while (start < paragraph.length()) {
+          auto end = start;
+          character_count lastBreak = -1;
+          while (end < paragraph.length()) {
+            auto next = end + 1;
+            // Never split a UTF-8 code point, including in long file paths.
+            while (next < paragraph.length() && (::u8(paragraph[next]) & 0xc0) == 0x80) ++next;
+            if (end > start && get_text_extents(paragraph.substr(start, next - start)).cx > r.width()) break;
+            if (paragraph[end] == ' ' || paragraph[end] == '\t') lastBreak = end;
+            end = next;
+          }
+          auto lineEnd = end;
+          if (end < paragraph.length() && lastBreak > start) lineEnd = lastBreak;
+          ::string line = paragraph.substr(start, lineEnd - start);
+          line.trim_right();
+          lines.add(line);
+          start = lineEnd;
+          while (start < paragraph.length() && (paragraph[start] == ' ' || paragraph[start] == '\t')) ++start;
+        }
+      }
+      if (paragraphEnd == text.length()) break;
+      paragraphStart = paragraphEnd + 1;
+    }
+  }
+  auto font = native_font();
+  m_view->SetFont(&font);
+  font_height height;
+  font.GetHeight(&height);
+  auto lineHeight = height.ascent + height.descent + height.leading;
+  auto blockHeight = lines.size() * lineHeight;
+  auto top = r.top;
+  if (align & e_align_vertical_center) top += (r.height() - blockHeight) / 2;
+  else if (align & e_align_bottom) top = r.bottom - blockHeight;
+  m_view->PushState();
+  BRegion clip;
+  clip.Set(native_rect(r));
+  m_view->ConstrainClippingRegion(&clip);
+  for (const auto &line : lines) {
+    if (top + height.ascent > r.bottom) break;
+    ::f64_rectangle lineRectangle(r.left, top, r.right, top + lineHeight);
+    _draw_text(line, lineRectangle, e_draw_text_single_line, e_align_top_left | (align & (e_align_horizontal_center | e_align_right)));
+    top += lineHeight;
+  }
+  m_view->PopState();
+}
+void context::_draw_text(const ::scoped_string &t, const ::f64_rectangle &r,
+                         const ::e_draw_text &, const ::e_align &a) {
+  if (!m_view)
+    return;
+  ::string text(t);
+  auto size = get_text_extents(t);
+  BFont font;
+  m_view->GetFont(&font);
+  font_height h;
+  font.GetHeight(&h);
+  float x = r.left, y = r.top + h.ascent;
+  if (a & e_align_horizontal_center)
+    x += (r.width() - size.cx) / 2;
+  else if (a & e_align_right)
+    x = r.right - size.cx;
+  if (a & e_align_vertical_center)
+    y = r.top + (r.height() - size.cy) / 2 + h.ascent;
+  else if (a & e_align_bottom)
+    y = r.bottom - h.descent;
+  if (m_brush)
+    m_view->SetHighColor(native_color(m_brush->m_color));
+  m_view->DrawString(text.c_str(), BPoint(x, y));
+}
+void context::draw_icon(double x, double y, double w, double h,
+                        ::nano::graphics::icon *i) {
+  auto *icon = dynamic_cast<nano_graphics_haiku::icon *>(i);
+  if (m_view && icon && icon->m_bitmap)
+    m_view->DrawBitmap(icon->m_bitmap, icon->m_bitmap->Bounds(),
+                       BRect(x, y, x + w - 1, y + h - 1));
+}
+} // namespace nano_graphics_haiku

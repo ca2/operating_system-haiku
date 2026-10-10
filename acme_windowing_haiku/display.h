@@ -11,6 +11,9 @@ public:
  bool is_dark_mode_through_theming() override;
  ::string theming_ui_name() override;
  ::string impl_get_desktop_theme() override;
+ ::string get_desktop_theme_name() override;
  void impl_set_desktop_theme(const ::scoped_string &theme) override;
+ ::string _get_wallpaper(::collection::index screen) override;
+ void _set_wallpaper(::collection::index screen, const ::scoped_string &path) override;
 };
 }

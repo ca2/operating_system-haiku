@@ -37,6 +37,7 @@ namespace acme_haiku
 
    ::string node::default_component_implementation(const ::scoped_string &name)
    {
+      if (name == "nano_graphics") return "haiku";
       if (name == "nano_http" || name == "nano_compress") return "command_line";
       return ::acme_posix::node::default_component_implementation(name);
    }
@@ -735,16 +736,14 @@ namespace acme_haiku
 
       auto implementation = file()->safe_get_string("appconfig://audio.txt");
       implementation.trim();
-      if (implementation == "audio_sunaudio" || implementation == "sunaudio")
-         return "sunaudio";
-      if (implementation == "audio_oss" || implementation == "oss")
-         return "oss";
+      if (implementation == "audio_haiku" || implementation == "haiku")
+         return "haiku";
       if (implementation.has_character())
          warning() << "Unknown appconfig://audio.txt backend: " << implementation;
 #ifdef CA2_HAIKU_AUDIO_IMPLEMENTATION
       return CA2_HAIKU_AUDIO_IMPLEMENTATION;
 #else
-      return "sunaudio";
+      return "haiku";
 #endif
 
    }
@@ -1729,6 +1728,3 @@ namespace acme_haiku
 
 
 } // namespace acme_haiku
-
-
-

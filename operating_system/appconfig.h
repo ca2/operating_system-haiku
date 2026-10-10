@@ -11,4 +11,4 @@
 
 #define default_acme_windowing acme_windowing_haiku
 #define default_operating_ambient operating_ambient_haiku
-#define default_nano_graphics nano_graphics_cairo
+#define default_nano_graphics nano_graphics_haiku

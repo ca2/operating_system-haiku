@@ -4,6 +4,16 @@
 #include <InterfaceDefs.h>
 #include <Message.h>
 #include <cstdio>
+#include <FindDirectory.h>
+#include <Node.h>
+#include <Path.h>
+#include <Messenger.h>
+#include <Screen.h>
+#include <be_apps/Tracker/Background.h>
+#include <vector>
+#include <string>
+#include <fs_attr.h>
+#include <DataIO.h>
 namespace haiku::acme::windowing {
 void display::open_display(){monitor m;m_bDisplayOpened=m.update_native_cache();if(!m_bDisplayOpened)throw ::exception(error_failed,"Cannot open Haiku screen");_enumerate_monitors();}
 bool display::is_display_opened() const{return m_bDisplayOpened;}
@@ -12,6 +22,55 @@ void display::_enumerate_monitors(){
  for(int i=0;;++i){monitor m;m.m_iScreen=i;if(!m.update_native_cache())break;_on_monitor(i,m.m_rectangleNative,m.m_rectangleNativeWorkspace);}
 }
 ::i32_size display::get_main_screen_size(){monitor m;if(!m.update_native_cache())throw ::exception(error_failed,"Cannot query Haiku screen");return m.m_rectangleNative.size();}
+
+::string display::_get_wallpaper(::collection::index screen)
+{
+ if(screen != 0) return "";
+ BPath desktop;
+ if(find_directory(B_DESKTOP_DIRECTORY, &desktop) != B_OK) return "";
+ BNode node(desktop.Path());
+ attr_info info;
+ if(node.GetAttrInfo(B_BACKGROUND_INFO, &info) != B_OK || info.size <= 0) return "";
+ std::vector<char> buffer(info.size);
+ if(node.ReadAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, buffer.data(), buffer.size()) != info.size) return "";
+ BMessage background;
+ BMemoryIO stream(buffer.data(), buffer.size());
+ if(background.Unflatten(&stream) != B_OK) return "";
+ for(int32 i = 0;; ++i) {
+  int32 workspaces;
+  const char *path;
+  if(background.FindInt32(B_BACKGROUND_WORKSPACES, i, &workspaces) != B_OK
+     && background.FindUInt32(B_BACKGROUND_WORKSPACES, i, (uint32 *)&workspaces) != B_OK) break;
+  if((workspaces & (uint32(1) << current_workspace())) != 0
+     && background.FindString(B_BACKGROUND_IMAGE, i, &path) == B_OK) return path;
+ }
+ return "";
+}
+
+void display::_set_wallpaper(::collection::index screen, const ::scoped_string &value)
+{
+ if(screen != 0) throw ::exception(error_bad_argument, "Haiku has one desktop background per workspace");
+ ::string path(value);
+ BNode image(path.c_str());
+ if(image.InitCheck() != B_OK) throw ::exception(error_file_not_found, "Haiku wallpaper file is unavailable");
+ BPath desktop;
+ if(find_directory(B_DESKTOP_DIRECTORY, &desktop) != B_OK) throw ::exception(error_failed, "Cannot find Haiku Desktop");
+ BNode node(desktop.Path());
+ BMessage background;
+ background.AddString(B_BACKGROUND_IMAGE, path.c_str());
+ background.AddInt32(B_BACKGROUND_MODE, B_BACKGROUND_MODE_SCALED);
+ background.AddPoint(B_BACKGROUND_ORIGIN, BPoint(0, 0));
+ background.AddBool(B_BACKGROUND_ERASE_TEXT, true);
+ // Tracker reads this workspace bitmask as B_INT32_TYPE, including -1 for all.
+ background.AddInt32(B_BACKGROUND_WORKSPACES, -1);
+ std::vector<char> buffer(background.FlattenedSize());
+ if(background.Flatten(buffer.data(), buffer.size()) != B_OK
+    || node.WriteAttr(B_BACKGROUND_INFO, B_MESSAGE_TYPE, 0, buffer.data(), buffer.size()) != (ssize_t)buffer.size())
+  throw ::exception(error_failed, "Cannot save Haiku desktop background");
+ BMessenger tracker("application/x-vnd.Be-TRAK");
+ BMessage refresh(B_RESTORE_BACKGROUND_IMAGE);
+ if(tracker.SendMessage(&refresh, (BHandler *)nullptr, 3000000) != B_OK) throw ::exception(error_failed, "Cannot refresh Haiku desktop background");
+}
 
 namespace {
 // Capture Appearance colors, excluding the deprecated desktop background role.
@@ -75,4 +134,9 @@ void display::impl_set_desktop_theme(const ::scoped_string &value)
  // Apply all roles together so applications receive one coherent palette change.
  set_ui_colors(&colors);
 }
+}
+
+std::string haiku_appearance_name();
+namespace haiku::acme::windowing {
+::string display::get_desktop_theme_name(){return haiku_appearance_name().c_str();}
 }

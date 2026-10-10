@@ -19,6 +19,9 @@ namespace windowing_haiku
 
       ~window() override;
 
+      void set_mouse_capture() override { ::windowing::window::set_mouse_capture(); }
+      void release_mouse_capture() override { ::windowing::window::release_mouse_capture(); }
+      void create_window() override { ::windowing::window::create_window(); }
       void _create_window() override;
       bool client_to_screen(::i32_point *) override;
       bool screen_to_client(::i32_point *) override;
@@ -50,7 +53,3 @@ namespace windowing_haiku
 
 
 } // namespace windowing_haiku
-
-
-
-

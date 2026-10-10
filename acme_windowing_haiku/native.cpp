@@ -83,7 +83,7 @@ public:
   if(released&B_SECONDARY_MOUSE_BUTTON)mouse_event(14,p);
  }
  void MouseMoved(BPoint p,uint32,const BMessage *) override {mouse_event(6,p);}
- void Draw(BRect) override {if(bitmap){SetDrawingMode(B_OP_ALPHA);SetBlendingMode(B_PIXEL_ALPHA,B_ALPHA_OVERLAY);DrawBitmap(bitmap.get(),BPoint(0,0));}}
+ void Draw(BRect) override {haiku_window_event e{20};e.width=int(Bounds().Width()+1);e.height=int(Bounds().Height()+1);e.graphics=this;owner->event(owner->owner,&e);if(bitmap){SetDrawingMode(B_OP_ALPHA);SetBlendingMode(B_PIXEL_ALPHA,B_ALPHA_OVERLAY);DrawBitmap(bitmap.get(),BPoint(0,0));}}
 };
 class window : public BWindow {
 public:
@@ -155,3 +155,5 @@ extern "C" int haiku_screen_info(int index,int *bounds,int *workspace){
 }
 
 extern "C" int haiku_window_is_active(void *p){auto *s=static_cast<state *>(p);if(!s || !s->window->Lock())return 0;bool active=s->window->IsActive();s->window->Unlock();return active?1:0;}
+
+extern "C" void haiku_window_invalidate(void *p){auto*s=static_cast<state*>(p);if(s&&s->window&&s->window->Lock()){s->window->ChildAt(0)->Invalidate();s->window->Unlock();}}

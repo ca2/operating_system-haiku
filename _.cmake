@@ -59,9 +59,7 @@ endif()
 
 add_compile_definitions(__HAIKU__)
 
-# Alternative default (both modules are built):
-# set(default_audio audio_oss CACHE STRING "SunOS audio backend" FORCE)
-set_property(CACHE default_audio PROPERTY STRINGS audio_sunaudio audio_oss)
+set_property(CACHE default_audio PROPERTY STRINGS audio_haiku)
 
 #set(LINK_STATIC_OPTION "-static")
 set(LINK_STATIC_OPTION "")
@@ -151,8 +149,11 @@ set(default_acme_windowing acme_windowing_haiku)
 set(default_windowing windowing_haiku)
 set(default_imaging imaging_freeimage)
 set(default_networking networking_bsd)
-set(default_audio audio_sunaudio CACHE STRING "SunOS audio backend")
-set(default_nano_graphics nano_graphics_cairo)
+# Migrate the SunOS defaults inherited by the initial Haiku configuration.
+if(NOT DEFINED default_audio OR default_audio STREQUAL "audio_sunaudio" OR default_audio STREQUAL "audio_oss")
+   set(default_audio audio_haiku CACHE STRING "Haiku audio backend" FORCE)
+endif()
+set(default_nano_graphics nano_graphics_haiku)
 
 
 
@@ -190,7 +191,7 @@ if(${DESKTOP_AMBIENT})
            operating_ambient_haiku
            windowing_haiku
            acme_windowing_haiku
-           nano_graphics_cairo
+           nano_graphics_haiku
            ${aura_libraries})
 
 else()
@@ -258,5 +259,3 @@ if("${APPINDICATOR_PKG_MODULE}" STREQUAL "")
 else ()
    message(STATUS "APPINDICATOR_PKG_MODULE is ${APPINDICATOR_PKG_MODULE}")
 endif()
-
-
