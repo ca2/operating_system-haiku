@@ -1,0 +1,47 @@
+// Created by camilo on 2021-01-21 14:57 <3ThomasBorregaardSorensen
+#include "platform.h"
+#include "acme/operating_system.h"
+#include "micro::window.h"
+
+
+class ::micro::message_box :
+   virtual public micro::window
+{
+public:
+
+
+   HWND              m_hwnd;
+
+
+
+
+   ::micro::message_box();
+   ~::micro::message_box();
+
+   virtual void display_synchronously(const ::scoped_string & scopedstrMessage, const ::scoped_string & scopedstrTitle, const ::e_message_box & emessagebox);
+   //pointer< ::sequence < ::conversation > > display(const ::scoped_string & scopedstrMessage, const ::scoped_string & scopedstrTitle, const ::e_message_box & emessagebox);
+
+   void on_draw(HDC hdc) override;
+
+   //void draw_buttons(HDC hdc);
+
+   //void delete_drawing_objects();
+   //bool get_dark_mode();
+
+   //void create_drawing_objects();
+   //void update_drawing_objects();
+   //enum_dialog_result hit_test(::i32 x, ::i32 y);
+   //void on_mouse_down(::i32 x, ::i32 y);
+   //void on_mouse_up(::i32 x, ::i32 y);
+   //enum_dialog_result get_result();
+
+   //static LRESULT CALLBACK s_window_procedure(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
+
+   //LRESULT window_procedure(UINT message, WPARAM wparam, LPARAM lparam);
+
+   void on_click(const ::atom & atom) override;
+
+   void add_button(const ::scoped_string & scopedstrText, enum_dialog_result edialogresult);
+
+
+};

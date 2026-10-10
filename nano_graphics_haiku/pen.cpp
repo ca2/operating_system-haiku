@@ -1,0 +1,46 @@
+//
+// Created by camilo on 31/01/2022 16:06 <3ThomasBorregaardSorensen!!
+//
+#include "platform.h"
+#include "pen.h"
+//#include "_nano.h"
+
+
+
+      namespace nano_graphics_gdi
+      {
+
+         pen::pen()
+         {
+
+            //m_pthis = this;
+
+         }
+
+
+         pen::~pen()
+         {
+
+         }
+
+
+         //void pen::update(::nano::graphics::context* pgraphicscontext)
+         //{
+
+         //   if (m_bModified)
+         //   {
+
+         //      destroy();
+
+         //      m_hgdiobj = ::CreatePen(PS_SOLID, m_iWidth, win32_COLORREF(m_color));
+
+         //      m_bModified = false;
+
+         //   }
+
+         //}
+
+
+
+      } // namespace nano_graphics_gdi
+
