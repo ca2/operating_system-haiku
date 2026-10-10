@@ -45,7 +45,8 @@ public:
  double pending_wheel_y = 0;
  uint32 pressed_buttons = 0;
  view(state *s,BRect r):BView(r,"ca2-client",B_FOLLOW_ALL,B_WILL_DRAW|B_FRAME_EVENTS|B_NAVIGABLE),owner(s){SetViewColor(245,245,245);}
- void AttachedToWindow() override {BView::AttachedToWindow();SetEventMask(B_POINTER_EVENTS,B_NO_POINTER_HISTORY);}
+ // B_POINTER_EVENTS in SetEventMask subscribes to clicks outside this window.
+ // Normal hit testing handles idle input; MouseDown enables temporary drag tracking.
  void mouse_event(int kind,BPoint p){auto screen=ConvertToScreen(p);notify(owner,{kind,int(p.x),int(p.y),int(screen.x),int(screen.y)});}
  void MouseDown(BPoint p) override {
   Window()->Activate();MakeFocus(true);SetMouseEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS);

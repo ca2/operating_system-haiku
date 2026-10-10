@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
+#include <Roster.h>
+#include <Entry.h>
 
 
 //::user::enum_desktop _get_edesktop();
@@ -750,16 +752,32 @@ namespace acme_haiku
 
    void node::shell_open(const ::file::path & path, const ::scoped_string & strParams, const ::file::path & pathFolder)
    {
+      string value(path);
+      auto colon = value.find_index(':');
+      status_t status;
+      if (colon > 0)
+      {
+         auto scheme = value.left(colon);
+         const char *arguments[] = {value.c_str()};
+         auto type = "application/x-vnd.Be.URL." + scheme;
+         status = be_roster->Launch(type.c_str(), 1, arguments);
+         if (status != B_OK && status != B_ALREADY_RUNNING
+            && (scheme == "http" || scheme == "https"))
+            status = be_roster->Launch("text/html", 1, arguments);
+      }
+      else
+      {
+         entry_ref ref;
+         status = get_ref_for_path(value.c_str(), &ref);
+         if (status == B_OK) status = be_roster->Launch(&ref);
+      }
+      if (status != B_OK && status != B_ALREADY_RUNNING)
+         throw ::exception(error_failed, "Haiku could not open the requested link or file");
+   }
 
-      string str(path);
-
-      fork([this, str]()
-           {
-
-              ::system("xdg-open \"" + str + "\" & ");
-
-           });
-
+   void node::open_internet_link(const ::scoped_string &url, const ::scoped_string &, const ::scoped_string &)
+   {
+      shell_open(::file::path(url));
    }
 
 

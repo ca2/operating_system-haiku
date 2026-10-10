@@ -2,6 +2,37 @@
 
 set(OPERATING_SYSTEM_NAME "haiku")
 set(__HAIKU__ TRUE)
+
+# Call from an executable's __implement/CMakeLists.txt after add_executable().
+# The application id uses the same repo/app spelling as m_strAppId.
+function(haiku_set_application_icon target app_id icon)
+   if(NOT TARGET "${target}")
+      message(FATAL_ERROR "haiku_set_application_icon: unknown target ${target}")
+   endif()
+   get_target_property(_haiku_target_type "${target}" TYPE)
+   if(NOT _haiku_target_type STREQUAL "EXECUTABLE")
+      message(FATAL_ERROR "haiku_set_application_icon requires an executable")
+   endif()
+   get_filename_component(_haiku_icon "${icon}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+   if(NOT EXISTS "${_haiku_icon}")
+      message(FATAL_ERROR "haiku_set_application_icon: icon not found: ${_haiku_icon}")
+   endif()
+   if(NOT TARGET ca2_haiku_app_metadata)
+      add_executable(ca2_haiku_app_metadata EXCLUDE_FROM_ALL
+         "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/tools/app_metadata.cpp")
+      target_link_libraries(ca2_haiku_app_metadata PRIVATE be translation)
+   endif()
+   string(REPLACE "/" "." _haiku_app_id "${app_id}")
+   add_dependencies("${target}" ca2_haiku_app_metadata)
+   set_property(TARGET "${target}" APPEND PROPERTY LINK_DEPENDS
+      "${_haiku_icon}" "$<TARGET_FILE:ca2_haiku_app_metadata>")
+   add_custom_command(TARGET "${target}" POST_BUILD
+      COMMAND $<TARGET_FILE:ca2_haiku_app_metadata>
+         $<TARGET_FILE:${target}> "${_haiku_icon}" "application/x-vnd.ca2.${_haiku_app_id}"
+      COMMENT "Embedding the Haiku application icon for ${target}"
+      VERBATIM)
+endfunction()
+
 set(USE_PKGCONFIG TRUE)
 list(APPEND global_library_references network)
 set(INCLUDE_DRAW2D_CAIRO TRUE)

@@ -994,7 +994,7 @@ namespace draw2d_haiku
          for (int y = 0; y < h; y++)
          {
             auto *s = static_cast<const uint8_t *>(native->m_pbbitmap->Bits()) + y * native->m_pbbitmap->
-                      BytesPerRow();
+                       BytesPerRow();
             auto *t = static_cast<uint8_t *>(copy.Bits()) + y * copy.BytesPerRow();
             memory_copy(t, s, w * 4);
             for (int x = 0; x < w; x++)
