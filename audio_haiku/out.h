@@ -11,6 +11,7 @@ public:
   memsize m_read = 0, m_write = 0, m_queued = 0;
   int m_frameBytes = 0, m_nativeBufferBytes = 0;
   ::u8 m_silence = 0;
+  ::f64 m_outputGain = 1.0;
   ~out() override;
   ::string default_audio_device() override;
   int device_open(int precision, ::u32 rate, unsigned char channels) override;

@@ -14,6 +14,15 @@
 #include <Volume.h>
 #include <VolumeRoster.h>
 #include <FindDirectory.h>
+#include "apex/input/input.h"
+
+::pointer<::input::input> apex_haiku::node::create_input()
+{
+   ::pointer<::input::input> input;
+   auto factory = system()->factory("input", "haiku");
+   factory->constructø(this, input);
+   return input;
+}
 
 void apex_haiku::node::root_ones(::file::listing_base &listing)
 {

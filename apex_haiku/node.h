@@ -30,6 +30,7 @@ namespace apex_haiku
 
       void initialize(::particle * pparticle) override;
       void root_ones(::file::listing_base & listing) override;
+      ::pointer<::input::input> create_input() override;
 
 
       string get_user_name() override;

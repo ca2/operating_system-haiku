@@ -34,6 +34,10 @@ int out::device_open(int precision,::u32 rate,unsigned char channels){
  m_nativeBufferBytes=actual.buffer_size;
  m_queue.set_size(maximum(memsize(m_nativeBufferBytes)*8,memsize(m_frameBytes)*32768));
  m_read=m_write=m_queued=0;
+ // Haiku can retain a mixer's input gain between clients with the same name.
+ // Initialize this stream explicitly instead of inheriting a stale mute.
+ m_outputGain=global_volume() * minimum(1.0, maximum(0.0, m_dVolume));
+ m_player->SetVolume(float(m_outputGain));
  m_player->SetHasData(true);
  return 0;
 }
@@ -64,6 +68,8 @@ void out::fill(void *cookie,void *buffer,size_t size,const media_raw_audio_forma
  ::memory_copy(buffer,self->m_queue.data()+self->m_read,first);
  ::memory_copy(static_cast<::u8*>(buffer)+first,self->m_queue.data(),count-first);
  self->m_read=(self->m_read+count)%self->m_queue.size();self->m_queued-=count;
+ // Mixer gains have a floor on Haiku; zero must still mean complete silence.
+ if(self->m_outputGain==0.0)::memory_set(buffer,self->m_silence,size);
 }
 }
 

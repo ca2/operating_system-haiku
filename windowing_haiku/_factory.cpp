@@ -7,9 +7,13 @@
 #include "text_composition_client.h"
 #include "shell.h"
 #include "icon.h"
+#include "notify_icon.h"
+
 #include "aura/windowing/keyboard.h"
 #include "aura/windowing/cursor.h"
 IMPLEMENT_FACTORY(windowing_haiku){
+ pfactory->add_factory_item<::windowing_haiku::notify_icon,::user::notify_icon>();
+
  pfactory->add_factory_item<::windowing_haiku::windowing,::acme::windowing::windowing>();
  pfactory->add_factory_item<::windowing_haiku::window,::acme::windowing::window>();
  pfactory->add_factory_item<::windowing_haiku::display,::acme::windowing::display>();
