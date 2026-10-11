@@ -3,6 +3,7 @@
 #include "window.h"
 #include "graphics.h"
 #include "aura/user/user/interaction_thread.h"
+#include "aura/user/user/interaction_graphics_thread.h"
 #include "acme/windowing/display.h"
 #include "acme_windowing_haiku/windowing.h"
 #include "aura/user/user/interaction.h"
@@ -37,6 +38,7 @@ namespace windowing_haiku
 
    void window::_create_window()
    {
+      if (m_native) return;
       auto *ui = user_interaction();
       if (ui)
          m_rectangle = {ui->const_layout().sketch().origin(), ui->const_layout().sketch().size()};
@@ -48,7 +50,7 @@ namespace windowing_haiku
       ::haiku::acme::windowing::window::_create_window();
       if (ui)
          ui->send_message(::user::e_message_create, 0, 0);
-      create_graphics_thread();
+      if (!m_pgraphicsthread->is_task_set2()) create_graphics_thread();
    }
 
    bool window::client_to_screen(::i32_point *p)
@@ -314,10 +316,10 @@ namespace windowing_haiku
          auto edisplay = ui->const_layout().sketch().display();
          bool minimized = edisplay == e_display_iconic;
          bool visible = minimized || ::is_screen_visible(edisplay);
-         if (visible != m_nativeVisible)
+         if (!visible && m_nativeVisible)
          {
-            haiku_window_show(m_native, visible ? 1 : 0);
-            m_nativeVisible = visible;
+            haiku_window_show(m_native, 0);
+            m_nativeVisible = false;
          }
          if (minimized != m_nativeMinimized)
          {
@@ -329,6 +331,11 @@ namespace windowing_haiku
             return;
       }
       ::windowing::window::draw_frame();
+      if (!m_nativeVisible && haiku_window_has_frame(m_native))
+      {
+         haiku_window_show(m_native, 1);
+         m_nativeVisible = true;
+      }
    }
 
    void window::window_update_screen()

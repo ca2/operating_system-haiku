@@ -37,8 +37,7 @@ void window::_create_window() {
                           r.left, r.top, r.width(), r.height());
   if (!m_native)
     throw ::exception(error_failed, "Cannot create Haiku BWindow");
-  haiku_window_show(m_native, 1);
-  m_nativeVisible = true;
+  m_nativeVisible = false;
 }
 void window::native_event(const haiku_window_event &e) {
   if (e.kind == 1)
@@ -133,6 +132,7 @@ void window::create_window() {
     self->on_window_create(nullptr);
     self->on_window_size(self->get_window_rectangle().size());
     self->m_bMicroReady = true;
+    self->show_window(::user_interface::e_show_window_show_normal);
     self->redraw();
   });
 }

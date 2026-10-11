@@ -2,6 +2,7 @@
 #include <AppFileInfo.h>
 #include <Bitmap.h>
 #include <Deskbar.h>
+#include <Entry.h>
 #include <File.h>
 #include <Looper.h>
 #include <MenuItem.h>
@@ -18,6 +19,7 @@
 #include <unistd.h>
 
 static const char * signature = "application/x-vnd.ca2-deskbar";
+static const int libraryAnchor = 0;
 static const uint32 commandMessage = 'c2nc', bitmapMessage = 'c2nb';
 
 class Ca2DeskbarView : public BView
@@ -56,7 +58,13 @@ public:
    {
       SetViewColor(B_TRANSPARENT_COLOR);
       if (Parent()) SetLowColor(Parent()->ViewColor());
-      if (menu) menu->SetTargetForItems(owner);
+      if (menu) SetMenuTargets(menu.get());
+   }
+   void SetMenuTargets(BMenu * target)
+   {
+      target->SetTargetForItems(owner);
+      for (int32 i = 0; i < target->CountItems(); ++i)
+         if (target->ItemAt(i)->Submenu()) SetMenuTargets(target->ItemAt(i)->Submenu());
    }
    void Draw(BRect) override
    {
@@ -145,21 +153,31 @@ extern "C" int haiku_notify_install(void * data)
 {
    auto h = static_cast<notify_handle *>(data);
    Dl_info info;
-   if (!dladdr(reinterpret_cast<void *>(&haiku_notify_install), &info)) return B_ENTRY_NOT_FOUND;
+   if (!dladdr(&libraryAnchor, &info)) return B_ENTRY_NOT_FOUND;
    BFile file(info.dli_fname, B_READ_WRITE);
    BAppFileInfo appInfo(&file);
+   appInfo.SetInfoLocation(B_USE_ATTRIBUTES);
    auto status = appInfo.SetSignature(signature);
    if (status != B_OK) return status;
-   update_mime_info(info.dli_fname, false, true, false);
-   create_app_meta_mime(info.dli_fname, false, true, false);
+   appInfo.SetType(B_APP_MIME_TYPE);
+   entry_ref reference;
+   status = get_ref_for_path(info.dli_fname, &reference);
+   if (status != B_OK) return status;
+   BMimeType mime(signature);
+   if (!mime.IsInstalled()) mime.Install();
+   mime.SetPreferredApp(signature);
+   status = mime.SetAppHint(&reference);
+   if (status != B_OK) return status;
    BDeskbar deskbar;
    if (deskbar.HasItem(h->view->Name())) deskbar.RemoveItem(h->view->Name());
-   return deskbar.AddItem(h->view.get(), &h->id);
+   status = deskbar.AddItem(h->view.get());
+   if (status != B_OK) return status;
+   return deskbar.GetItemInfo(h->view->Name(), &h->id);
 }
 extern "C" bool haiku_notify_exists(void * data)
 {
    auto h = static_cast<notify_handle *>(data);
-   return h && h->id >= 0 && BDeskbar().HasItem(h->id);
+   return h && h->id >= 0 && BDeskbar().HasItem(h->view->Name());
 }
 extern "C" void haiku_notify_bitmap(void * data, const void * bitmap)
 {
@@ -167,7 +185,7 @@ extern "C" void haiku_notify_bitmap(void * data, const void * bitmap)
    if (!bitmap) return;
    h->view->bitmap.reset(new BBitmap(static_cast<const BBitmap *>(bitmap)));
    BDeskbar deskbar;
-   if (h->id >= 0) deskbar.RemoveItem(h->id);
+   if (h->id >= 0) deskbar.RemoveItem(h->view->Name());
    h->id = -1;
    deskbar.AddItem(h->view.get(), &h->id);
 }
@@ -175,7 +193,7 @@ extern "C" void haiku_notify_destroy(void * data)
 {
    auto h = static_cast<notify_handle *>(data);
    if (!h) return;
-   if (h->id >= 0) BDeskbar().RemoveItem(h->id);
+   if (h->id >= 0) BDeskbar().RemoveItem(h->view->Name());
    if (h->listener->Lock()) h->listener->Quit();
    delete h;
 }

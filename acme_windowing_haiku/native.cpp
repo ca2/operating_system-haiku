@@ -111,7 +111,10 @@ extern "C" int haiku_app_post(void (*call)(void *),void *context,void (*dispose)
 extern "C" void *haiku_window_create(void *owner,void (*event)(void *,const haiku_window_event *),const char *title,int x,int y,int w,int h){
  if(!app || w<=0 || h<=0)return nullptr;auto *s=new(std::nothrow) state;if(!s)return nullptr;s->owner=owner;s->event=event;
  {std::lock_guard<std::mutex> guard(registry_mutex);s->id=next_id++;windows[s->id]=s;}
- s->window=new window(s,title,x,y,w,h);return s;
+ s->window=new window(s,title,x,y,w,h);
+ // Start the window looper without showing its unpainted client area.
+ s->window->Run();
+ return s;
 }
 extern "C" void haiku_window_destroy(void *p){auto *s=static_cast<state *>(p);if(!s)return;{std::lock_guard<std::mutex> guard(registry_mutex);windows.erase(s->id);}if(s->window->Lock())s->window->Quit();delete s;
  bool empty;{std::lock_guard<std::mutex> guard(registry_mutex);empty=windows.empty();}if(empty)haiku_app_quit();}
@@ -128,6 +131,11 @@ extern "C" void haiku_window_present(void *p,const void *data,int w,int h,int st
  auto bitmap=std::make_unique<BBitmap>(BRect(0,0,w-1,h-1),B_RGBA32);if(bitmap->InitCheck()!=B_OK)return;
  for(int y=0;y<h;y++)for(int x=0;x<w;x++){const auto *a=static_cast<const uint8_t *>(data)+y*stride+x*4;auto *b=static_cast<uint8_t *>(bitmap->Bits())+y*bitmap->BytesPerRow()+x*4;b[3]=a[3];for(int c=0;c<3;c++){unsigned v=a[3]?(unsigned(a[c])*255+a[3]/2)/a[3]:0;b[c]=v>255?255:v;}}
  if(s->window->Lock()){auto *v=static_cast<window *>(s->window)->client;v->bitmap=std::move(bitmap);v->Invalidate();s->window->Unlock();}
+}
+extern "C" int haiku_window_has_frame(void *p){
+ auto *s=static_cast<state *>(p);if(!s || !s->window->Lock())return 0;
+ bool ready=static_cast<window *>(s->window)->client->bitmap != nullptr;
+ s->window->Unlock();return ready?1:0;
 }
 extern "C" void haiku_screen_bounds(int *x,int *y,int *w,int *h){BScreen screen;auto f=screen.Frame();*x=int(f.left);*y=int(f.top);*w=f.IntegerWidth()+1;*h=f.IntegerHeight()+1;}
 extern "C" void haiku_mouse_position(int *x,int *y){*x=0;*y=0;state *s=nullptr;{std::lock_guard<std::mutex> guard(registry_mutex);if(!windows.empty())s=windows.begin()->second;}if(s && s->window->Lock()){auto *v=s->window->ChildAt(0);BPoint p;uint32 buttons;v->GetMouse(&p,&buttons,false);v->ConvertToScreen(&p);*x=int(p.x);*y=int(p.y);s->window->Unlock();}}
