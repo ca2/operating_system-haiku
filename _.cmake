@@ -149,6 +149,7 @@ set(default_acme_windowing acme_windowing_haiku)
 set(default_windowing windowing_haiku)
 set(default_imaging imaging_freeimage)
 set(default_networking networking_bsd)
+set(default_accessibility accessibility_haiku)
 # Migrate the SunOS defaults inherited by the initial Haiku configuration.
 if(NOT DEFINED default_audio OR default_audio STREQUAL "audio_sunaudio" OR default_audio STREQUAL "audio_oss")
    set(default_audio audio_haiku CACHE STRING "Haiku audio backend" FORCE)

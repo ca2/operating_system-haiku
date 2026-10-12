@@ -3,21 +3,21 @@
 #pragma once
 
 
-#include "axis/accessibility/application.h"
+#include "acme/accessibility/application.h"
 
 
-namespace accessibility_windows
+namespace accessibility_haiku
 {
 
 
-   class CLASS_DECL_ACCESSIBILITY_WINDOWS application :
+   class CLASS_DECL_ACCESSIBILITY_HAIKU application :
       virtual public ::accessibility::application
    {
    public:
 
 
-      HANDLE            m_handle;
-      bool              m_bHandle;
+      // HANDLE m_handle; // Windows process handle.
+      
 
 
       application();
@@ -34,7 +34,7 @@ namespace accessibility_windows
    };
 
 
-} //    namespace namespace accessibility_windows
+} //    namespace namespace accessibility_haiku
 
 
 

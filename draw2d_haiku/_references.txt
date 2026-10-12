@@ -1,2 +1,1 @@
 default_aura_platform1
-operating_system-windows/gdiplus_library

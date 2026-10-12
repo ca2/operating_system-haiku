@@ -1,21 +1,25 @@
 // Created by camilo on 2023-04-15 19:30 <3ThomasBorregaardSorensen!!
 #pragma once
+#include <Messenger.h>
+#include <OS.h>
 
 
-#include "axis/accessibility/main_window.h"
+#include "acme/accessibility/main_window.h"
 
 
-namespace accessibility_windows
+namespace accessibility_haiku
 {
 
 
-   class CLASS_DECL_ACCESSIBILITY_WINDOWS main_window :
+   class CLASS_DECL_ACCESSIBILITY_HAIKU main_window :
       virtual public ::accessibility::main_window
    {
    public:
 
 
-      HWND m_hwnd;
+      // HWND m_hwnd; // Windows window handle.
+      BMessenger m_window;
+      team_id m_team = -1;
 
 
       main_window();
@@ -38,7 +42,7 @@ namespace accessibility_windows
    };
 
 
-} //    namespace accessibility_windows
+} //    namespace accessibility_haiku
 
 
 
