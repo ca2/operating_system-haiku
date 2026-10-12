@@ -1,0 +1,67 @@
+#include "platform.h"
+#include "acme/prototype/string/string.h"
+#include "acme/_operating_system.h"
+
+
+BSTR AllocSysString(const ::wd32_character * pchData, character_count nDataLength) noexcept
+{
+
+   BSTR bstr = nullptr;
+
+   character_count nLen = utf_to_utf_length2(bstr, pchData, nDataLength);
+
+   bstr = ::SysAllocStringLen(nullptr, (::u32)nLen);
+
+   if (bstr != nullptr)
+   {
+
+      ::utf_to_utf(bstr, pchData, nDataLength);
+
+   }
+
+   return bstr;
+
+}
+
+
+// pbstr is [in,out] BSTR string
+bool ReAllocSysString(BSTR * pbstr, const ::wd32_character * pchData, character_count nDataLength) noexcept
+{
+
+   character_count nLen = utf_to_utf_length2((wchar_t *) pbstr, pchData, nDataLength);
+
+   bool bSuccess = ::SysReAllocStringLen(pbstr, nullptr, (::u32)nLen) != 0;
+
+   if (bSuccess)
+   {
+
+      ::utf_to_utf(*pbstr, pchData, nDataLength);
+
+   }
+
+   return bSuccess;
+
+}
+
+
+::u32 format_message(::u32 dwFlags, const void * pSource, ::u32 dwMessageID, ::u32 dwLanguageID, ::wd32_character * pszBuffer, ::u32 nSize, va_list * pArguments) noexcept
+{
+
+#ifdef WINDOWS
+
+   throw_todo();
+
+   return 0;
+
+   //return ::FormatMessageW(dwFlags, pSource, dwMessageID, dwLanguageID, pszBuffer, nSize, pArguments);
+
+#else
+
+   return 0;
+
+#endif
+
+}
+
+
+
