@@ -1144,98 +1144,9 @@ namespace apex_haiku
 
         void node::file_open(const ::file::path & path, const ::scoped_string & scopedstrParams, const ::file::path & pathFolder)
         {
-
-            string strTarget;
-
-            strTarget = m_papplication->defer_process_path(path);
-
-            if(haiku_can_exec(strTarget))
-            {
-
-                //int iPid;
-
-                //daemonize_process(strTarget, &iPid);
-
-                //::system("cd /; setsid \"" + strTarget + "\" </dev/null &>/dev/null");
-
-                //i32 daemonize_process(const char * _cmd_line, i32 * pprocessId)
-
-                // 2018-01-29 call_async("/bin/bash", "-c \"" + strTarget + "\"", strFolder, SW_SHOWDEFAULT, false);
-
-                this->call_async(strTarget, scopedstrParams, pathFolder, e_display_default, false);
-
-//         char * pszCommandLine = strdup(strTarget + " " + strParams);
-
-//         pid_t pid = ::fork();
-//
-//         if(pid == 0)
-//         {
-//
-//            int iExitCode = ::system(pszCommandLine);
-//
-//            free(pszCommandLine);
-//
-//            exit(iExitCode);
-//
-//         }
-//         else if(pid < 0)
-//         {
-//
-//            free(pszCommandLine);
-//
-//            return false;
-//
-//         }
-
-                //return true;
-
-            }
-            else
-            {
-
-                //call_async("/bin/bash", "-i -c 'xdg-open \"" + strTarget + "\"'", strFolder, SW_SHOWDEFAULT, false);
-
-                //::system("nohup /bin/bash -l -c 'xdg-open \"" + strTarget + "\"' > /dev/null 2>&1&");
-
-                //::system("nohup xdg-open \"" + strTarget + "\" > /dev/null 2>&1&");
-
-                this->user_post([this, strTarget]()
-                                  {
-
-                                      string strUri = strTarget;
-
-                                      if(!strUri.contains("://"))
-                                      {
-
-                                          strUri = "file://" + strUri;
-
-                                      }
-
-                                      string strError;
-
-                                      int iBufferSize = 4096;
-
-                                      char * pszError = strError.get_buffer(iBufferSize);
-
-                                      int iBool = this->os_launch_uri(strUri, pszError, iBufferSize);
-
-                                      strError.release_buffer();
-
-                                      if(!iBool)
-                                      {
-
-                                          informationf("Error launching file : \"%s\" , %s", strUri.c_str(), strError.c_str());
-
-                                      }
-
-                                  });
-
-            }
-
-            //return true;
-
+            auto target = m_papplication->defer_process_path(path);
+            ::acme_haiku::node::file_open(target, scopedstrParams, pathFolder);
         }
-
 
 //   void node::list_process(::file::path_array & patha, u32_array & uaPid)
 //   {
@@ -1375,6 +1286,3 @@ namespace apex_haiku
 
 
 } // namespace apex_haiku
-
-
-

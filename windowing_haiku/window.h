@@ -31,6 +31,7 @@ namespace windowing_haiku
       void main_send(const ::procedure &) override;
       void main_post(const ::procedure &) override;
       void set_window_text(const ::scoped_string &) override;
+      void show_task(bool show) override;
       ::i32_rectangle get_window_rectangle() override;
       void set_position(const ::i32_point &) override;
       void set_size(const ::i32_size &) override;

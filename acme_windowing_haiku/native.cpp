@@ -145,16 +145,31 @@ extern "C" int haiku_screen_info(int index,int *bounds,int *workspace){
  BScreen screen;if(!screen.IsValid())return 0;
  for(int i=0;i<index;i++)if(screen.SetToNext()!=B_OK)return 0;
  auto frame=screen.Frame();auto work=frame;
- BDeskbar deskbar;
- if(deskbar.IsRunning() && !deskbar.IsAutoHide()){
-  auto bar=deskbar.Frame();
+ // BDeskbar's synchronous queries wait indefinitely for a reply. A stalled
+ // Deskbar must not prevent applications from creating their first window.
+ BMessenger deskbar("application/x-vnd.Be-TSKB");
+ BMessage hideRequest('ghid'), hideReply;
+ bool autoHide=false;
+ const bigtime_t timeout=100000;
+ if(deskbar.IsValid() && deskbar.SendMessage(&hideRequest,&hideReply,timeout,timeout)==B_OK
+    && hideReply.FindBool("auto hide",&autoHide)==B_OK && !autoHide){
+  BMessage frameRequest(B_GET_PROPERTY), frameReply;
+  frameRequest.AddSpecifier("Frame");
+  frameRequest.AddSpecifier("Window",int32(0));
+  BMessage locationRequest('gloc'), locationReply;
+  BRect bar;int32 location;
+  if(deskbar.SendMessage(&frameRequest,&frameReply,timeout,timeout)==B_OK
+     && frameReply.FindRect("result",&bar)==B_OK
+     && deskbar.SendMessage(&locationRequest,&locationReply,timeout,timeout)==B_OK
+     && locationReply.FindInt32("location",&location)==B_OK){
   if(frame.Intersects(bar)){
-   switch(deskbar.Location()){
+   switch(location){
     case B_DESKBAR_TOP:work.top=bar.bottom+1;break;
     case B_DESKBAR_BOTTOM:work.bottom=bar.top-1;break;
     case B_DESKBAR_LEFT_TOP:case B_DESKBAR_LEFT_BOTTOM:work.left=bar.right+1;break;
     case B_DESKBAR_RIGHT_TOP:case B_DESKBAR_RIGHT_BOTTOM:work.right=bar.left-1;break;
    }
+  }
   }
  }
  bounds[0]=int(frame.left);bounds[1]=int(frame.top);bounds[2]=int(frame.right)+1;bounds[3]=int(frame.bottom)+1;

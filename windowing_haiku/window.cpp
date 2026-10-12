@@ -277,6 +277,11 @@ namespace windowing_haiku
    }
 
    void window::set_window_text(const ::scoped_string &p) { ::haiku::acme::windowing::window::set_window_text(p); }
+   void window::show_task(bool)
+   {
+      // Deskbar owns application entries. Keep the window's native feel and
+      // visibility intact when ca2 requests a per-window taskbar preference.
+   }
    ::i32_rectangle window::get_window_rectangle() { return ::haiku::acme::windowing::window::get_window_rectangle(); }
    void window::set_position(const ::i32_point &p) { ::haiku::acme::windowing::window::set_position(p); }
    void window::set_size(const ::i32_size &p) { ::haiku::acme::windowing::window::set_size(p); }

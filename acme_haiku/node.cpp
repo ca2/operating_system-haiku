@@ -7,11 +7,16 @@
 #include "path_system.h"
 #include "acme/operating_system/summary.h"
 #include "acme/filesystem/filesystem/file_context.h"
+#include "acme/platform/application.h"
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
 #include <Roster.h>
 #include <Entry.h>
+#include <Node.h>
+#include <NodeInfo.h>
+#include <MimeType.h>
+#include <Message.h>
 
 
 //::user::enum_desktop _get_edesktop();
@@ -768,10 +773,42 @@ namespace acme_haiku
       {
          entry_ref ref;
          status = get_ref_for_path(value.c_str(), &ref);
-         if (status == B_OK) status = be_roster->Launch(&ref);
+         if (status == B_OK)
+         {
+            BNode node(&ref);
+            BNodeInfo info(&node);
+            char type[B_MIME_TYPE_LENGTH] = {};
+            auto typeStatus = info.GetType(type);
+            if (typeStatus != B_OK)
+            {
+               BMimeType guessed;
+               if (BMimeType::GuessMimeType(value.c_str(), &guessed) == B_OK)
+               {
+                  ::string guessedType(guessed.Type());
+                  ::ansi_copy(type, guessedType.c_str());
+               }
+            }
+            if (type[0] && ::string(type) != B_APP_MIME_TYPE && ::string(type) != "application/x-vnd.Be-directory")
+            {
+               // Launching by ref treats executable permission bits as a
+               // request to run the document. Use its document association.
+               BMessage refs(B_REFS_RECEIVED);
+               refs.AddRef("refs", &ref);
+               char preferred[B_MIME_TYPE_LENGTH] = {};
+               auto preferredStatus = info.GetPreferredApp(preferred);
+               status = be_roster->Launch(preferredStatus == B_OK && preferred[0] ? preferred : type, &refs);
+            }
+            else status = be_roster->Launch(&ref);
+         }
       }
       if (status != B_OK && status != B_ALREADY_RUNNING)
-         throw ::exception(error_failed, "Haiku could not open the requested link or file");
+         throw ::exception(error_failed, "Haiku could not open " + value + ": status=" + ::as_string(status));
+   }
+
+   void node::file_open(const ::file::path & path, const ::scoped_string & params, const ::file::path & folder)
+   {
+      if (path.is_empty()) throw ::exception(error_bad_argument, "Cannot open an empty file path");
+      shell_open(path, params, folder);
    }
 
    void node::open_internet_link(const ::scoped_string &url, const ::scoped_string &, const ::scoped_string &)

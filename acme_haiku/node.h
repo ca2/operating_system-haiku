@@ -66,6 +66,7 @@ namespace acme_haiku
 
 
       void shell_open(const ::file::path & path, const ::scoped_string & scopedstrParams = "", const ::file::path & pathFolder = "") override;
+      void file_open(const ::file::path & path, const ::scoped_string & params = "", const ::file::path & folder = "") override;
       void open_internet_link(const ::scoped_string &url, const ::scoped_string &profile = {}, const ::scoped_string &target = {}) override;
 
 

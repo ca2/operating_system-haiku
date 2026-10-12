@@ -23,12 +23,12 @@ void font::update(::draw2d::graphics *graphics) {
     m_pbfont->SetFace((m_fontweight.as_i32() >= 700 ? B_BOLD_FACE : B_REGULAR_FACE) | (m_bItalic ? B_ITALIC_FACE : 0));
     font_height height{};
     m_pbfont->GetHeight(&height);
-    m_textmetric2.m_dAscent = height.ascent;
-    m_textmetric2.m_dDescent = height.descent;
-    m_textmetric2.m_dInternalLeading = 0;
-    m_textmetric2.m_dExternalLeading = height.leading;
-    m_textmetric2.m_dHeight = height.ascent + height.descent + height.leading;
-    m_textmetric2.m_dWeight = m_fontweight.as_i32();
-    m_textmetric2.m_bItalic = m_bItalic;
+    m_textmetric4.m_dAscent = height.ascent;
+    m_textmetric4.m_dDescent = height.descent;
+    m_textmetric4.m_dInternalLeading = 0;
+    m_textmetric4.m_dExternalLeading = height.leading;
+    m_textmetric4.m_dHeight = height.ascent + height.descent + height.leading;
+    m_textmetric4.m_dWeight = m_fontweight.as_i32();
+    m_textmetric4.m_bItalic = m_bItalic;
 }
 }
